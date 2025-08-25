@@ -1,397 +1,225 @@
 pipeline {
-    // Jenkins가 실행할 에이전트 지정 (any = 사용 가능한 모든 에이전트에서 실행)
     agent any
 
-    triggers {
-        // GitHub에서 Push 이벤트가 발생하면 자동으로 빌드 시작
-        githubPush()
+    environment {
+        NODE_ENV = "production"
+
+        // Docker Registry 설정
+        DOCKER_REGISTRY = "${env.CUSTOM_DOCKER_REGISTRY}"
+        DOCKER_CREDENTIALS = "${env.CUSTOM_DOCKER_CREDENTIALS}"
+        DOCKER_IMAGE = 'mangler/docgen-frontend'
+        CONTAINER_NAME = 'mangler-docgen-frontend'
+        DOCKERFILE_PATH = "deploy/Dockerfile"   // Dockerfile 경로
     }
 
     tools {
-        // Jenkins Global Tool Configuration에서 설정한 Node.js 버전
-        // Jenkins 관리 > Global Tool Configuration > NodeJS에서 'node-v22.18.0' 이름으로 설정 필요
-        nodejs 'node-v22.18.0'
-    }
-
-    environment {
-        // Jenkins Credentials에서 관리할 환경 변수들
-        NODE_ENV = 'production'  // Node.js 실행 환경 설정 (production/development/staging)
-
-        // 배포 경로 정보
-        DEPLOY_PATH = '/var/www/react-deploy-demo'  // 원격 서버의 애플리케이션 설치 경로
-        APP_NAME = 'react-deploy-demo'              // PM2에서 사용할 애플리케이션 이름
-        APP_PORT = '9001'                            // 애플리케이션이 실행될 포트 번호
+        nodejs 'node-v20.19.4'
     }
 
     stages {
-        stage('Checkout') {
+        stage('📥 Checkout') {
             steps {
-                // Git 저장소에서 소스 코드를 체크아웃 (SCM = Source Control Management)
-                checkout scm
-                // 현재 빌드 중인 브랜치 이름 출력
-                echo "Branch: ${env.GIT_BRANCH}"
-                // 현재 빌드 중인 커밋 해시 출력
-                echo "Commit: ${env.GIT_COMMIT}"
+                echo "📥 Git 저장소에서 코드 가져오기"
+                git branch: 'main', url: 'https://github.com/AICC-Mangler/docgen-backend.git'
             }
         }
 
-        stage('Install Dependencies') {
+        stage('📦 Install Dependencies') {
+            steps {
+                sh '''
+                    echo "📦 React + Vite + TypeScript 의존성 설치 시작"
+
+                    # 기존 node_modules 제거
+                    rm -rf node_modules package-lock.json
+
+                    # 최신 npm 설치 확인 (선택사항)
+                    npm install -g npm@latest || true
+
+                    # 의존성 설치 (devDependencies 포함)
+                    npm ci --prefer-offline --no-audit --no-fund --progress=false
+
+                    # 설치 확인
+                    echo "📋 Vite 확인:"
+                    ls -la node_modules/.bin/vite || echo "Vite 바이너리 확인 실패"
+
+                    echo "📋 TypeScript 확인:"
+                    ls -la node_modules/.bin/tsc || echo "TypeScript 바이너리 확인 실패"
+
+                    echo "✅ 의존성 설치 완료"
+                '''
+            }
+        }
+
+        stage('🏗️ Build NestJS') {
+            steps {
+                sh '''
+                    echo "🏗️ React + Vite + TypeScript 빌드 시작"
+
+                    # 빌드 산출물 제거
+                    rm -rf dist
+
+                    # Vite 빌드
+                    npm run build
+
+                    # 빌드 확인
+                    if [ -d "dist" ]; then
+                        echo "✅ 빌드 완료: dist 폴더 생성됨"
+                        ls -la dist
+                    else
+                        echo "❌ 빌드 실패: dist 폴더가 없음"
+                        exit 1
+                    fi
+                '''
+            }
+        }
+
+        stage('🧪 Test') {
+            steps {
+                sh '''
+                    echo "🧪 테스트 실행"
+                    npm run test || echo "⚠️ 테스트 실패 (무시하려면 여기서 처리)"
+                '''
+            }
+        }
+
+        stage('🐳 Docker Build') {
             steps {
                 script {
-                    sh '''
-                        # Node.js와 NPM 버전 확인 (디버깅용)
-                        echo "Node version: $(node -v)"
-                        echo "NPM version: $(npm -v)"
-                        echo "Current NODE_ENV: $NODE_ENV"
+                    try {
+                        echo "🐳 Docker 이미지 빌드 시작"
 
-                        # 이전 빌드의 잔재 제거 (클린 빌드 보장)
-                        echo "Cleaning previous installations..."
-                        rm -rf node_modules dist  # node_modules와 dist 폴더 삭제 (Vite는 dist 폴더 사용)
+                        def app = docker.build("${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${BUILD_NUMBER}", "-f ${DOCKERFILE_PATH} .")
 
-                        # 모든 의존성 설치 (devDependencies 포함)
-                        # npm ci: package-lock.json 기반 정확한 버전 설치 (npm install보다 빠르고 안정적)
-                        # --include=dev: production 환경에서도 devDependencies 설치 (빌드에 필요)
-                        echo "Installing dependencies (including devDependencies)..."
-                        npm ci --include=dev
+                        // 빌드 성공 시 환경 변수 설정
+                        env.DOCKER_BUILD_SUCCESS = 'true'
+                        env.DOCKER_IMAGE_TAG = "${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${BUILD_NUMBER}"
 
-                        # Vite 빌드 도구 확인
-                        echo "Verifying Vite build tools..."
-                        if [ -f "package.json" ] && grep -q '"build"' package.json; then
-                            echo "Vite build script found in package.json"
-                            echo "Available scripts:"
-                            npm run --silent
-                        else
-                            echo "ERROR: Build script not found in package.json"
-                            echo "Please ensure package.json has a 'build' script"
-                            exit 1  # 빌드 스크립트가 없으면 빌드 실패 처리
-                        fi
-                    '''
+                        echo "✅ Docker 이미지 빌드 성공"
+                        echo "📦 이미지 태그: ${env.DOCKER_IMAGE_TAG}"
+
+                    } catch (Exception e) {
+                        env.DOCKER_BUILD_SUCCESS = 'false'
+                        error "❌ Docker 빌드 실패: ${e.getMessage()}"
+                    }
                 }
             }
         }
 
-        stage('Code Quality') {
-            // 코드 품질 검사 단계 (현재 비활성화)
+        stage('📤 Push Docker Image') {
+            when {
+                environment name: 'DOCKER_BUILD_SUCCESS', value: 'true'
+            }
             steps {
-                echo "Code quality checks skipped for faster deployment"
-                // 린트 체크와 타입 체크를 건너뛰어 빌드 속도 향상
-                // 필요시 아래 주석을 해제하여 활성화 가능
-                /*
-                parallel {
-                    stage('Lint') {
-                        steps {
-                            script {
-                                try {
-                                    sh 'npm run lint -- --max-warnings=9999 || true'
-                                    echo "Lint completed (errors treated as warnings)"
-                                } catch (Exception e) {
-                                    echo "Lint found issues but continuing build..."
-                                }
+                script {
+                    try {
+                        docker.withRegistry("https://${DOCKER_REGISTRY}", "${DOCKER_CREDENTIALS}") {
+                            def app = docker.image("${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${BUILD_NUMBER}")
+                            app.push("${BUILD_NUMBER}")
+
+                            // main 브랜치는 latest 태그도 푸시
+                            def currentBranch = env.GIT_BRANCH ?: 'develop'
+                            if (currentBranch.contains('main')) {
+                                app.push("latest")
+                                echo "✅ latest 태그 푸시 완료"
                             }
                         }
+
+                        env.DOCKER_PUSH_SUCCESS = 'true'
+                        echo "✅ Docker 이미지 푸시 성공: ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${BUILD_NUMBER}"
+                    } catch (Exception e) {
+                        env.DOCKER_PUSH_SUCCESS = 'false'
+                        echo "❌ Docker Registry 인증 또는 푸시 실패: ${e.getMessage()}"
+                        echo "🔍 Docker Registry: ${DOCKER_REGISTRY}"
+                        echo "🔍 Credentials ID: ${DOCKER_CREDENTIALS}"
+                        error "Docker 푸시 실패: ${e.getMessage()}"
                     }
-                    stage('Type Check') {
-                        steps {
-                            script {
-                                try {
-                                    sh '''
-                                        echo "Running TypeScript type check..."
-                                        if [ -f "node_modules/.bin/tsc" ]; then
-                                            ./node_modules/.bin/tsc --noEmit || true
-                                            echo "TypeScript type check completed"
-                                        else
-                                            echo "TypeScript not available, skipping type check"
-                                        fi
-                                    '''
-                                } catch (Exception e) {
-                                    echo "TypeScript type check found issues but continuing build..."
-                                }
-                            }
+                }
+            }
+        }
+        stage('🚀 Deploy') {
+            when {
+                environment name: 'DOCKER_PUSH_SUCCESS', value: 'true'
+            }
+            steps {
+                script {
+                    def currentBranch = env.CURRENT_BRANCH ?: env.BRANCH_NAME ?: 'main'
+                    def deployEnv = currentBranch.contains('main') ? 'production' : 'development'
+                    def containerName = "${CONTAINER_NAME}-${deployEnv}"
+                    def containerPort = deployEnv == 'production' ? '8181' : '8181'
+                    def dockerNetwork = 'demo-net'
+
+                    echo "🚀 배포 시작: ${deployEnv} 환경"
+                    echo "📦 컨테이너: ${containerName}"
+                    echo "🔌 포트: ${containerPort}"
+                    echo "📦 이미지: ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${BUILD_NUMBER}"
+
+                    try {
+                        // Docker Registry 인증 후 이미지 pull
+                        docker.withRegistry("https://${DOCKER_REGISTRY}", "${DOCKER_CREDENTIALS}") {
+                            sh "docker pull ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${BUILD_NUMBER}"
                         }
+
+                        sh """
+                            # 기존 컨테이너 중지 및 삭제
+                            docker stop ${containerName} || true
+                            docker rm ${containerName} || true
+
+                            # 새 컨테이너 실행
+                            docker run -d \\
+                                --name ${containerName} \\
+                                --network ${dockerNetwork} \\
+                                --restart unless-stopped \\
+                                --label "app=nestjs-backend" \\
+                                --label "env=${deployEnv}" \\
+                                --label "version=${BUILD_NUMBER}" \\
+                                --label "branch=${currentBranch}" \\
+                                --label "commit=${env.GIT_COMMIT_SHORT}" \\
+                                -p ${containerPort}:8181 \\
+                                ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${BUILD_NUMBER}
+
+                            # 컨테이너 상태 확인
+                            sleep 5
+                            docker ps | grep ${containerName}
+                            echo "✅ 컨테이너 ${containerName} 배포 완료"
+                        """
+
+                        env.DEPLOY_SUCCESS = 'true'
+
+                    } catch (Exception e) {
+                        env.DEPLOY_SUCCESS = 'false'
+                        echo "❌ 배포 실패: ${e.getMessage()}"
+                        error "배포 실패: ${e.getMessage()}"
                     }
-                }
-                */
-            }
-        }
 
-        stage('Build') {
-            steps {
-                script {
-                    sh '''
-                        echo "Building Vite application..."
-                        
-                        # 이전 빌드 아티팩트 제거 (클린 빌드)
-                        rm -rf dist
-
-                        # Vite 프로덕션 빌드 실행
-                        # NODE_ENV=production: 프로덕션 최적화 활성화 (코드 압축, 트리 쉐이킹 등)
-                        NODE_ENV=production npm run build
-
-                        echo "Build completed successfully"
-                        
-                        # 빌드 결과 확인
-                        if [ -d "dist" ]; then
-                            echo "Dist directory created successfully"
-                            ls -la dist/
-                        else
-                            echo "ERROR: Dist directory not found"
-                            exit 1
-                        fi
-                    '''
-                }
-            }
-        }
-
-        stage('Test') {
-            steps {
-                script {
-                    sh '''
-                        echo "Running tests..."
-                        # 테스트 스크립트가 있다면 실행
-                        if npm run test --if-present; then
-                            echo "Tests completed successfully"
-                        else
-                            echo "No tests configured or tests failed"
-                        fi
-                    '''
-                }
-            }
-        }
-
-        stage('Prepare Deployment') {
-            steps {
-                script {
-                    // 배포 패키지 준비
-                    sh '''
-                        echo "Preparing deployment package..."
-
-                        # 배포 패키지 생성 (필요한 파일만 압축)
-                        # tar -czf: c(생성) z(gzip 압축) f(파일명 지정)
-                        tar -czf ${APP_NAME}.tar.gz \
-                            dist \
-                            public \
-                            package.json \
-                            package-lock.json \
-                            ecosystem.config.cjs
-
-                        echo "Deployment package created"
-                    '''
-                }
-            }
-        }
-
-        stage('Deploy to Production') {
-            steps {
-                script {
-                    // 브랜치 정보 출력 (디버깅용)
-                    echo "Current branch: ${env.BRANCH_NAME}"
-                    echo "GIT_BRANCH: ${env.GIT_BRANCH}"
-
-                    // main 브랜치인 경우에만 프로덕션 배포 실행
-                    // GIT_BRANCH는 'origin/main', 'main', 또는 'refs/heads/main' 형태일 수 있음
-                    if (env.GIT_BRANCH == 'origin/main' || env.GIT_BRANCH == 'main' || env.GIT_BRANCH?.endsWith('/main')) {
-                        echo "Deploying to production automatically..."
-                        deployToServer('production')
-                    } else {
-                        echo "Skipping deployment - not on main branch (current: ${env.GIT_BRANCH})"
+                    // 배포 후 헬스 체크
+                    if (env.DEPLOY_SUCCESS == 'true') {
+                        sh """
+                            echo "🔍 헬스 체크 시작"
+                            sleep 5
+                            for i in \$(seq 1 10); do
+                                if curl -f http://localhost:${containerPort} > /dev/null 2>&1; then
+                                    echo "✅ 애플리케이션이 정상적으로 실행 중입니다"
+                                    break
+                                else
+                                    echo "⏳ 대기 중... (\$i/10)"
+                                    sleep 3
+                                fi
+                            done
+                        """
                     }
                 }
             }
         }
-
     }
 
+    
+
     post {
-        // 파이프라인 실행 완료 후 수행할 작업 정의
         success {
-            echo 'Pipeline completed successfully!'
-            // 성공 시 Slack 또는 이메일 알림 (현재 주석 처리)
-            // slackSend(color: 'good', message: "Deployment successful: ${env.JOB_NAME} - ${env.BUILD_NUMBER}")
+            echo "✅ Pipeline 성공적으로 완료"
         }
         failure {
-            echo 'Pipeline failed!'
-            // 실패 시 Slack 또는 이메일 알림 (현재 주석 처리)
-            // slackSend(color: 'danger', message: "Deployment failed: ${env.JOB_NAME} - ${env.BUILD_NUMBER}")
-        }
-        always {
-            // 항상 실행: 워크스페이스 정리
-            cleanWs()
+            echo "❌ Pipeline 실패"
         }
     }
 }
-
-// 서버 배포 함수 정의
-def deployToServer(String environment) {
-    // 배포 경로 변수 설정
-    def deployPath = "${DEPLOY_PATH}"
-
-    // Jenkins Credentials에 저장된 배포 서버 정보 로드
-    // credentialsId: Jenkins에서 설정한 자격 증명 ID
-    // variable: 스크립트에서 사용할 변수명
-    withCredentials([
-        string(credentialsId: 'deploy-server-host', variable: 'DEPLOY_SERVER'),  // 배포 서버 호스트명/IP
-        string(credentialsId: 'deploy-server-user', variable: 'DEPLOY_USER'),      // SSH 접속 사용자명
-        string(credentialsId: 'VITE_KAKAO_MAP_API_KEY', variable: 'VITE_KAKAO_MAP_API_KEY'),  // 카카오 맵 API 키
-        string(credentialsId: 'VITE_KIOSK_BUS_STOP_ID', variable: 'VITE_KIOSK_BUS_STOP_ID')   // 키오스크 버스 정류장 ID
-    ]) {
-        // 디버깅을 위한 상세 정보 출력
-        sh '''#!/bin/bash
-            echo "=== Credential Debug Info ==="
-
-            # DEPLOY_SERVER 변수 유효성 검사
-            if [ -z "$DEPLOY_SERVER" ]; then  # -z: 문자열 길이가 0인지 확인
-                echo "ERROR: DEPLOY_SERVER is empty or not set!"
-                echo "Please check Jenkins Credentials configuration"
-                exit 1  # 변수가 없으면 빌드 실패
-            else
-                echo "DEPLOY_SERVER is set (value hidden for security)"
-                # 보안을 위해 전체 값 대신 첫 글자와 길이만 출력
-                echo "Server starts with: $(echo $DEPLOY_SERVER | cut -c1)"  # 첫 글자만 표시
-                echo "Server length: $(echo -n $DEPLOY_SERVER | wc -c)"       # 문자열 길이 표시
-            fi
-
-            # DEPLOY_USER 변수 유효성 검사
-            if [ -z "$DEPLOY_USER" ]; then  # -z: 문자열 길이가 0인지 확인
-                echo "ERROR: DEPLOY_USER is empty or not set!"
-                echo "Please check Jenkins Credentials configuration"
-                exit 1  # 변수가 없으면 빌드 실패
-            else
-                echo "DEPLOY_USER is set (value hidden for security)"
-                # 보안을 위해 전체 값 대신 첫 글자와 길이만 출력
-                echo "User starts with: $(echo $DEPLOY_USER | cut -c1)"  # 첫 글자만 표시
-                echo "User length: $(echo -n $DEPLOY_USER | wc -c)"       # 문자열 길이 표시
-            fi
-
-            echo "Variables are configured, proceeding..."
-        '''
-
-        // SSH 에이전트를 사용한 안전한 SSH 연결 설정
-        // 'aicc': Jenkins에 등록된 SSH Private Key의 ID
-        sshagent(credentials: ['aicc']) {
-            sh """
-                echo "Deploying to ${environment} server..."
-
-                # 직접 변수 사용 테스트
-                echo "Testing connection to: \${DEPLOY_USER}@\${DEPLOY_SERVER}"
-
-                # 원격 서버에 배포 디렉토리 생성
-                # -o StrictHostKeyChecking=no: 처음 연결 시 호스트 키 확인 프롬프트 건너뛰기
-                # mkdir -p: 부모 디렉토리까지 재귀적으로 생성, 이미 존재해도 오류 없음
-                ssh -o StrictHostKeyChecking=no \${DEPLOY_USER}@\${DEPLOY_SERVER} "mkdir -p ${deployPath}/releases/${BUILD_NUMBER}"
-
-                # 압축된 배포 패키지를 원격 서버로 전송
-                # scp: SSH를 통한 안전한 파일 복사
-                scp ${APP_NAME}.tar.gz \${DEPLOY_USER}@\${DEPLOY_SERVER}:${deployPath}/releases/${BUILD_NUMBER}/
-
-                # 원격 서버에서 배포 스크립트 실행
-                # << 'ENDSSH': Here Document 시작 (ENDSSH까지의 내용을 원격 서버에서 실행)
-                ssh \${DEPLOY_USER}@\${DEPLOY_SERVER} << 'ENDSSH'
-set -e  # 오류 발생 시 즉시 스크립트 종료
-
-# NVM (Node Version Manager) 환경 설정 로드
-export NVM_DIR="\$HOME/.nvm"  # NVM 설치 디렉토리 설정
-[ -s "\$NVM_DIR/nvm.sh" ] && . "\$NVM_DIR/nvm.sh"  # NVM 스크립트 로드 (파일이 존재하면)
-[ -s "\$NVM_DIR/bash_completion" ] && . "\$NVM_DIR/bash_completion"  # 자동 완성 기능 로드
-
-# Node.js 버전 설정 (순차적으로 시도)
-# default 버전 사용 → 실패 시 node 별칭 → 실패 시 stable 버전
-nvm use default || nvm use node || nvm use stable
-
-echo "Node version: \$(node -v)"
-echo "NPM version: \$(npm -v)"
-
-cd ${deployPath}/releases/${BUILD_NUMBER}
-
-# 배포 패키지 압축 해제
-tar -xzf ${APP_NAME}.tar.gz  # x(추출) z(gzip) f(파일)
-rm ${APP_NAME}.tar.gz         # 압축 파일 삭제 (공간 절약)
-
-# 프로덕션 환경 변수 파일 생성
-# 백엔드와 동일한 방식으로 환경변수 처리
-echo "Configuring environment variables..."
-
-                # 환경변수 설정 (Vite 빌드 시점에 자동으로 처리됨)
-                echo "Configuring environment variables for Vite build..."
-                
-                # 환경변수 설정
-                export VITE_KAKAO_MAP_API_KEY=${VITE_KAKAO_MAP_API_KEY}
-                export VITE_KIOSK_BUS_STOP_ID=${VITE_KIOSK_BUS_STOP_ID}
-                
-                echo "Environment variables configured:"
-                echo "-----------------------------------"
-                echo "NODE_ENV=production"
-                echo "VITE_KAKAO_MAP_API_KEY=*** (hidden for security)"
-                echo "VITE_KIOSK_BUS_STOP_ID=*** (hidden for security)"
-                echo "-----------------------------------"
-
-# 프로덕션 의존성만 설치
-# npm ci: package-lock.json 기반 정확한 버전 설치
-# --omit=dev: devDependencies 제외 (프로덕션에 불필요)
-# --no-audit: 보안 감사 건너뛰기 (배포 속도 향상)
-npm ci --omit=dev --no-audit
-
-# 이전 버전 백업 (롤백 대비)
-# -L: 심볼릭 링크인지 확인
-if [ -L ${deployPath}/current ]; then
-    rm ${deployPath}/previous 2>/dev/null || true  # 기존 previous 삭제 (오류 무시)
-    mv ${deployPath}/current ${deployPath}/previous  # current를 previous로 이동
-fi
-
-# 심볼릭 링크 업데이트 (무중단 배포)
-# ln -sfn: s(심볼릭 링크) f(강제 덮어쓰기) n(심볼릭 링크를 일반 파일처럼 취급)
-ln -sfn ${deployPath}/releases/${BUILD_NUMBER} ${deployPath}/current
-
-# Nginx 설정 업데이트 (React SPA를 위한 설정)
-if [ -f "nginx.conf" ]; then
-    echo "Updating Nginx configuration..."
-    sudo cp nginx.conf /etc/nginx/sites-available/${APP_NAME}
-    sudo ln -sf /etc/nginx/sites-available/${APP_NAME} /etc/nginx/sites-enabled/
-    sudo nginx -t && sudo systemctl reload nginx
-fi
-
-# PM2로 애플리케이션 재시작 (서버 사이드 렌더링이 필요한 경우)
-cd ${deployPath}/current
-
-# PM2 (Node.js 프로세스 매니저) 설치 확인
-# command -v: 명령어 존재 여부 확인
-# &> /dev/null: 출력 숨기기
-if ! command -v pm2 &> /dev/null; then
-    echo "PM2 not found, installing globally..."
-    npm install -g pm2  # 전역 설치
-fi
-
-# PM2 홈 디렉토리 설정 (로그 폴더 권한 문제 해결)
-export PM2_HOME="\$HOME/.pm2"  # 사용자 홈에 PM2 데이터 저장
-
-# PM2로 애플리케이션 실행/재시작 (서버 사이드 렌더링이 필요한 경우)
-# stop → start: 완전한 재시작으로 캐시 문제 해결
-# --env: ecosystem.config.cjs의 환경 설정 사용
-if [ -f "ecosystem.config.cjs" ]; then
-    echo "Stopping existing PM2 process..."
-    pm2 stop ${APP_NAME} || echo "No existing process to stop"
-    pm2 delete ${APP_NAME} || echo "No existing process to delete"
-    
-    echo "Starting fresh PM2 process..."
-    pm2 start ecosystem.config.cjs --env ${environment}
-    
-    # PM2 상태 확인
-    pm2 list  # 실행 중인 프로세스 목록 표시
-    # 최근 5줄의 로그 출력 (스트리밍 없이)
-    pm2 logs ${APP_NAME} --lines 5 --nostream || echo "Logs not available yet"
-else
-    echo "No ecosystem.config.cjs found - skipping PM2 deployment"
-    echo "React app is ready to be served by Nginx"
-fi
-
-# 오래된 릴리즈 정리 (디스크 공간 관리)
-cd ${deployPath}/releases
-# ls -t: 시간순 정렬 | tail -n +6: 6번째부터 출력 (최근 5개 제외)
-# xargs -I {}: 각 항목에 대해 rm -rf 실행
-ls -t | tail -n +6 | xargs -I {} rm -rf {}
-
-echo "Deployment to ${environment} completed!"
-ENDSSH
-            """
-        }
-    }
-} 
