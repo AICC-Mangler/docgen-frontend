@@ -27,28 +27,32 @@ pipeline {
         stage('📦 Install Dependencies') {
             steps {
                 sh '''
-                    echo "📦 React + Vite + TypeScript 의존성 설치 시작"
+                echo "📦 React + Vite + TypeScript 의존성 설치 시작"
 
-                    # 기존 node_modules 제거
-                    rm -rf node_modules
+                rm -rf node_modules
 
-                    # package-lock.json 확인
-                    if [ -f package-lock.json ]; then
-                        echo "🔒 package-lock.json 존재 -> npm ci 사용"
-                        npm ci --prefer-offline --no-audit --no-fund --progress=false
-                    else
-                        echo "⚠️ package-lock.json 없음 -> npm install 사용"
-                        npm install --prefer-offline --no-audit --no-fund --progress=false
-                    fi
+                if [ -f package-lock.json ]; then
+                    echo "🔒 package-lock.json 존재 -> npm ci 사용"
+                    npm ci --include=dev --prefer-offline --no-audit --no-fund --progress=false
+                else
+                    echo "⚠️ package-lock.json 없음 -> npm install 사용"
+                    npm install --include=dev --prefer-offline --no-audit --no-fund --progress=false
+                fi
 
-                    # 설치 확인
-                    echo "📋 Vite 확인:"
-                    ls -la node_modules/.bin/vite || echo "Vite 바이너리 확인 실패"
+                # 설치 확인
+                if [ -f node_modules/.bin/vite ]; then
+                    echo "📋 Vite 바이너리 확인 완료"
+                else
+                    echo "⚠️ Vite 바이너리 확인 실패"
+                fi
 
-                    echo "📋 TypeScript 확인:"
-                    ls -la node_modules/.bin/tsc || echo "TypeScript 바이너리 확인 실패"
+                if [ -f node_modules/.bin/tsc ]; then
+                    echo "📋 TypeScript 바이너리 확인 완료"
+                else
+                    echo "⚠️ TypeScript 바이너리 확인 실패"
+                fi
 
-                    echo "
+                echo "✅ 의존성 설치 완료"
                 '''
             }
         }
