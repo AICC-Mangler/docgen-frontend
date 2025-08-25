@@ -27,7 +27,7 @@ RUN npm install -g serve
 COPY --from=builder /app/dist ./dist
 
 # 포트 설정
-EXPOSE 8181
+EXPOSE 80
 
 # React 정적 파일 서버 실행
-CMD ["serve", "-s", "dist", "-l", "8181"]
+CMD ["serve", "-s", "dist", "-l", "80"]
