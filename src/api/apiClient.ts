@@ -1,9 +1,15 @@
 import axios from 'axios';
-import type { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
+import type {
+  AxiosInstance,
+  AxiosRequestConfig,
+  AxiosResponse,
+  AxiosError,
+} from 'axios';
 import type { ApiError } from '../types/api';
 
 // API 기본 설정
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3100';
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || 'http://localhost:3100';
 const API_TIMEOUT = 30000; // 30초
 
 // Axios 인스턴스 생성
@@ -20,53 +26,64 @@ const apiClient: AxiosInstance = axios.create({
 apiClient.interceptors.request.use(
   (config) => {
     // 요청 로깅
-    console.log(`🚀 API Request: ${config.method?.toUpperCase()} ${config.url}`, {
-      data: config.data,
-      params: config.params,
-    });
-    
+    console.log(
+      `🚀 API Request: ${config.method?.toUpperCase()} ${config.url}`,
+      {
+        data: config.data,
+        params: config.params,
+      },
+    );
+
     // 여기에서 Authorization 헤더 추가 가능
     // const token = localStorage.getItem('accessToken');
     // if (token) {
     //   config.headers = config.headers || {};
     //   config.headers.Authorization = `Bearer ${token}`;
     // }
-    
+
     return config;
   },
   (error) => {
     console.error('❌ Request Error:', error);
     return Promise.reject(error);
-  }
+  },
 );
 
 // 응답 인터셉터
 apiClient.interceptors.response.use(
   (response: AxiosResponse) => {
     // 응답 로깅
-    console.log(`✅ API Response: ${response.config.method?.toUpperCase()} ${response.config.url}`, {
-      status: response.status,
-      data: response.data,
-    });
-    
+    console.log(
+      `✅ API Response: ${response.config.method?.toUpperCase()} ${response.config.url}`,
+      {
+        status: response.status,
+        data: response.data,
+      },
+    );
+
     return response;
   },
   (error: AxiosError) => {
     // 에러 로깅
-    console.error(`❌ API Error: ${error.config?.method?.toUpperCase()} ${error.config?.url}`, {
-      status: error.response?.status,
-      data: error.response?.data,
-      message: error.message,
-    });
-    
+    console.error(
+      `❌ API Error: ${error.config?.method?.toUpperCase()} ${error.config?.url}`,
+      {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message,
+      },
+    );
+
     // 에러 응답 처리
-    const responseData = error.response?.data as { error?: string; message?: string } | undefined;
+    const responseData = error.response?.data as
+      | { error?: string; message?: string }
+      | undefined;
     const apiError: ApiError = {
       message: error.message || '알 수 없는 오류가 발생했습니다.',
       statusCode: error.response?.status,
       error: responseData?.error || responseData?.message,
     };
-    
+
     // 상태 코드별 에러 처리
     switch (error.response?.status) {
       case 400:
@@ -98,9 +115,9 @@ apiClient.interceptors.response.use(
           apiError.message = '네트워크 연결을 확인해주세요.';
         }
     }
-    
+
     return Promise.reject(apiError);
-  }
+  },
 );
 
 // API 클라이언트 내보내기
@@ -108,24 +125,40 @@ export default apiClient;
 
 // 편의 메서드들
 export const api = {
-  get: <T = any>(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> =>
-    apiClient.get(url, config),
-  
-  post: <T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> =>
-    apiClient.post(url, data, config),
-  
-  put: <T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> =>
-    apiClient.put(url, data, config),
-  
-  delete: <T = any>(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> =>
-    apiClient.delete(url, config),
-  
-  patch: <T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> =>
-    apiClient.patch(url, data, config),
+  get: <T = any>(
+    url: string,
+    config?: AxiosRequestConfig,
+  ): Promise<AxiosResponse<T>> => apiClient.get(url, config),
+
+  post: <T = any>(
+    url: string,
+    data?: any,
+    config?: AxiosRequestConfig,
+  ): Promise<AxiosResponse<T>> => apiClient.post(url, data, config),
+
+  put: <T = any>(
+    url: string,
+    data?: any,
+    config?: AxiosRequestConfig,
+  ): Promise<AxiosResponse<T>> => apiClient.put(url, data, config),
+
+  delete: <T = any>(
+    url: string,
+    config?: AxiosRequestConfig,
+  ): Promise<AxiosResponse<T>> => apiClient.delete(url, config),
+
+  patch: <T = any>(
+    url: string,
+    data?: any,
+    config?: AxiosRequestConfig,
+  ): Promise<AxiosResponse<T>> => apiClient.patch(url, data, config),
 };
 
 // 베이스 URL과 타임아웃 설정을 외부에서 변경할 수 있도록 함수 제공
-export const updateApiConfig = (config: { baseURL?: string; timeout?: number }) => {
+export const updateApiConfig = (config: {
+  baseURL?: string;
+  timeout?: number;
+}) => {
   if (config.baseURL) {
     apiClient.defaults.baseURL = config.baseURL;
   }

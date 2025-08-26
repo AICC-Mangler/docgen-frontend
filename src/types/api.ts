@@ -4,10 +4,9 @@
 export const MemberRole = {
   USER: 'USER',
   ADMIN: 'ADMIN',
-  MODERATOR: 'MODERATOR'
 } as const;
 
-export type MemberRole = typeof MemberRole[keyof typeof MemberRole];
+export type MemberRole = (typeof MemberRole)[keyof typeof MemberRole];
 
 // Member 기본 타입
 export interface Member {

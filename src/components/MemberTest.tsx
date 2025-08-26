@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  MemberService, 
-  Member, 
+  MemberService} 
+   from '../api';
+
+import type {Member, 
   CreateMemberDto, 
   UpdateMemberDto, 
   MemberRole 
