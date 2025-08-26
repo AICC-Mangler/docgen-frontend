@@ -59,7 +59,7 @@ pipeline {
             }
         }
 
-        state('.env file 생성'){
+        stage('.env file 생성'){
             script{
                 withCredentials([
                         file(credentialsId: ENV_FILE_CREDENTIALS_ID, variable: 'ENV_FILE')
