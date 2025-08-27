@@ -188,7 +188,7 @@ pipeline {
                             sh "docker pull ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${BUILD_NUMBER}"
                         }
 
-                        sh '''
+                        sh """
                             # 기존 컨테이너 중지 및 삭제
                             docker stop ${containerName} || true
                             docker rm ${containerName} || true
@@ -211,7 +211,7 @@ pipeline {
                             sleep 5
                             docker ps | grep ${containerName}
                             echo "✅ 컨테이너 ${containerName} 배포 완료"
-                        '''
+                        """
 
                         env.DEPLOY_SUCCESS = 'true'
 
@@ -223,7 +223,7 @@ pipeline {
 
                     // 배포 후 헬스 체크
                     if (env.DEPLOY_SUCCESS == 'true') {
-                        sh '''
+                        sh """
                             echo "🔍 헬스 체크 시작"
                             sleep 5
                             for i in \$(seq 1 10); do
@@ -235,7 +235,7 @@ pipeline {
                                     sleep 3
                                 fi
                             done
-                        '''
+                        """
                     }
                 }
             }
