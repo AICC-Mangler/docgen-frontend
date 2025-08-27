@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const Footer: React.FC = () => {
   return (
@@ -7,14 +8,17 @@ const Footer: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
           {/* 회사 정보 */}
           <div className="space-y-3">
-            <div className="flex items-center space-x-3">
+            <Link
+              to="/dashboard"
+              className="flex items-center space-x-3 hover:opacity-80 transition-opacity duration-200"
+            >
               <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
                 <span className="text-white font-bold text-lg">D</span>
               </div>
               <span className="text-xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
                 Docgen
               </span>
-            </div>
+            </Link>
             <p className="text-gray-600 text-sm leading-relaxed">
               문서 관리 시스템으로 비즈니스 효율성을 극대화하세요. 안전하고
               직관적인 플랫폼을 제공합니다.
@@ -63,8 +67,8 @@ const Footer: React.FC = () => {
           <div className="space-y-3">
             <h3 className="text-lg font-semibold text-green-800">빠른 링크</h3>
             <div className="space-y-2">
-              <a
-                href="/documents"
+              <Link
+                to="/documents"
                 className="flex items-center space-x-2 text-gray-600 hover:text-green-700 transition-colors duration-200 group"
               >
                 <svg
@@ -81,9 +85,9 @@ const Footer: React.FC = () => {
                   />
                 </svg>
                 <span>문서 관리</span>
-              </a>
-              <a
-                href="/templates"
+              </Link>
+              <Link
+                to="/hashtag"
                 className="flex items-center space-x-2 text-gray-600 hover:text-green-700 transition-colors duration-200 group"
               >
                 <svg
@@ -99,10 +103,10 @@ const Footer: React.FC = () => {
                     d="M9 5l7 7-7 7"
                   />
                 </svg>
-                <span>템플릿</span>
-              </a>
-              <a
-                href="/analytics"
+                <span>해시태그</span>
+              </Link>
+              <Link
+                to="/notices"
                 className="flex items-center space-x-2 text-gray-600 hover:text-green-700 transition-colors duration-200 group"
               >
                 <svg
@@ -118,10 +122,10 @@ const Footer: React.FC = () => {
                     d="M9 5l7 7-7 7"
                   />
                 </svg>
-                <span>분석</span>
-              </a>
-              <a
-                href="/settings"
+                <span>공지사항</span>
+              </Link>
+              <Link
+                to="/dashboard"
                 className="flex items-center space-x-2 text-gray-600 hover:text-green-700 transition-colors duration-200 group"
               >
                 <svg
@@ -137,8 +141,8 @@ const Footer: React.FC = () => {
                     d="M9 5l7 7-7 7"
                   />
                 </svg>
-                <span>설정</span>
-              </a>
+                <span>대시보드</span>
+              </Link>
             </div>
           </div>
 
