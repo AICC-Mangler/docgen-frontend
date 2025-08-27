@@ -1,4 +1,3 @@
-import React from 'react';
 import MemberTest from './components/MemberTest';
 import './App.css';
 import Header from './layouts/header';
@@ -8,14 +7,14 @@ function App() {
   const envTest = import.meta.env.VITE_ENV_TEST;
   return (
     <div>
-      <Header/>
+      <Header />
       <main>
         <h1>envTest : {envTest}</h1>
         <MemberTest />
       </main>
-      <Footer/>
-      </div>
+      <Footer />
+    </div>
   );
 }
 
-export default App
+export default App;
