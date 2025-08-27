@@ -8,6 +8,7 @@ import Documents from './components/pages/document';
 import Notices from './components/pages/notice';
 import Hashtag from './components/pages/hashtag';
 import MemberTest from './components/page';
+import Timeline from './components/pages/timeline/timeline';
 import { useSidebarStore } from './stores/useSidebarStore';
 
 function App() {
@@ -31,6 +32,7 @@ function App() {
                 <Route path="/documents" element={<Documents />} />
                 <Route path="/notices" element={<Notices />} />
                 <Route path="/hashtag" element={<Hashtag />} />
+                <Route path="/timelines" element={<Timeline />} />
                 <Route path="/member-test" element={<MemberTest />} />
               </Routes>
             </div>
