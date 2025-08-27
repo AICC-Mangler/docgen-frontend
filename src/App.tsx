@@ -4,7 +4,7 @@ import Header from './layouts/header';
 import Footer from './layouts/footer';
 
 function App() {
-  const envTest = import.meta.env.VITE_ENV_TEST;
+  const envTest = 'test';
   return (
     <div>
       <Header />
