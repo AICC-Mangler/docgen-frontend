@@ -65,7 +65,7 @@ pipeline {
                     withCredentials([
                             file(credentialsId: ENV_FILE_CREDENTIALS_ID, variable: 'ENV_FILE')
                         ]) {
-                            sh """
+                            sh '''
                                 echo "📄 환경 변수 파일 복사 중"
                                 cp "\$ENV_FILE" .env
                                 chmod 644 .env
@@ -79,7 +79,7 @@ pipeline {
                                 echo "✅ 환경 변수 파일 생성 및 정리 완료"
                                 echo "📋 환경 변수 파일 내용 확인:"
                                 cat .env | head -10
-                            """
+                            '''
                         }
                     }
             }
@@ -194,7 +194,7 @@ pipeline {
                             sh "docker pull ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${BUILD_NUMBER}"
                         }
 
-                        sh """
+                        sh '''
                             # 기존 컨테이너 중지 및 삭제
                             docker stop ${containerName} || true
                             docker rm ${containerName} || true
@@ -225,7 +225,7 @@ pipeline {
                             sleep 5
                             docker ps | grep ${containerName}
                             echo "✅ 컨테이너 ${containerName} 배포 완료"
-                        """
+                        '''
 
                         env.DEPLOY_SUCCESS = 'true'
 
@@ -237,7 +237,7 @@ pipeline {
 
                     // 배포 후 헬스 체크
                     if (env.DEPLOY_SUCCESS == 'true') {
-                        sh """
+                        sh '''
                             echo "🔍 헬스 체크 시작"
                             sleep 5
                             for i in \$(seq 1 10); do
@@ -249,7 +249,7 @@ pipeline {
                                     sleep 3
                                 fi
                             done
-                        """
+                        '''
                     }
                 }
             }
