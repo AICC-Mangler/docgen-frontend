@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { useUserStore } from '../stores/useUserStore';
 
 interface SidebarProps {
   isOpen?: boolean;
@@ -6,13 +8,15 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle }) => {
-  const [activeMenu, setActiveMenu] = useState('dashboard');
+  const location = useLocation();
   const [searchTerm, setSearchTerm] = useState('');
+  const { user } = useUserStore();
 
   const menuItems = [
     {
       id: 'dashboard',
       label: '대시보드',
+      path: '/dashboard',
       icon: (
         <svg
           className="w-6 h-6"
@@ -38,6 +42,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle }) => {
     {
       id: 'documents',
       label: '문서 목록',
+      path: '/documents',
       icon: (
         <svg
           className="w-6 h-6"
@@ -57,6 +62,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle }) => {
     {
       id: 'notices',
       label: '공지사항',
+      path: '/notices',
       icon: (
         <svg
           className="w-6 h-6"
@@ -76,6 +82,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle }) => {
     {
       id: 'hashtag',
       label: '해시태그',
+      path: '/hashtag',
       icon: (
         <svg
           className="w-6 h-6"
@@ -107,12 +114,25 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle }) => {
     // 여기에 검색 로직을 구현하세요
   };
 
+  // 현재 활성 메뉴 확인
+  const getActiveMenu = () => {
+    const currentPath = location.pathname;
+    if (currentPath === '/' || currentPath === '/dashboard') return 'dashboard';
+    return (
+      menuItems.find((item) => item.path === currentPath)?.id || 'dashboard'
+    );
+  };
+
+  const activeMenu = getActiveMenu();
+
   return (
     <aside
-      className={`bg-gradient-to-b from-white to-green-50/30 border-r border-green-200/50 w-96 h-[calc(100vh-80px-80px)] transition-all duration-300 z-40 backdrop-blur-sm shadow-xl${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
+      className={`bg-gradient-to-b from-white to-green-50/30 border-r border-green-200/50 w-full h-full transition-all duration-300 z-40 backdrop-blur-sm shadow-xl flex flex-col ${
+        isOpen ? 'translate-x-0' : '-translate-x-full'
+      }`}
     >
       {/* 사이드바 헤더 */}
-      <div className="p-8 border-b border-green-200/50 bg-gradient-to-r from-green-600 to-emerald-600">
+      <div className="p-8 border-b border-green-200/50 bg-gradient-to-r from-green-600 to-emerald-600 flex-shrink-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
@@ -126,7 +146,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle }) => {
           {onToggle && (
             <button
               onClick={onToggle}
-              className="p-2 text-white/80 hover:text-white hover:bg-white/20 rounded-xl transition-all duration-200"
+              className="p-2 bg-green-600 text-white hover:bg-green-700 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md"
             >
               <svg
                 className="w-6 h-6"
@@ -138,7 +158,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle }) => {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
+                  d="M15 19l-7-7 7-7"
                 />
               </svg>
             </button>
@@ -147,7 +167,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle }) => {
       </div>
 
       {/* 검색 텍스트 창*/}
-      <div className="p-6 border-b border-green-200/50">
+      <div className="p-6 border-b border-green-200/50 flex-shrink-0">
         <form onSubmit={handleSearch} className="relative">
           <div className="relative">
             <input
@@ -176,13 +196,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle }) => {
         </form>
       </div>
 
-      {/* 네비게이션 메뉴 */}
-      <nav className="p-6">
+      {/* 네비게이션 메뉴 - 스크롤 가능하도록 */}
+      <nav className="p-6 flex-1 overflow-y-auto">
         <ul className="space-y-3">
           {menuItems.map((item) => (
             <li key={item.id}>
-              <button
-                onClick={() => setActiveMenu(item.id)}
+              <Link
+                to={item.path}
                 className={`w-full flex items-center space-x-4 px-6 py-4 rounded-2xl transition-all duration-200 group ${
                   activeMenu === item.id
                     ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg transform scale-105'
@@ -199,23 +219,27 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle }) => {
                   {item.icon}
                 </span>
                 <span className="font-semibold text-lg">{item.label}</span>
-              </button>
+              </Link>
             </li>
           ))}
         </ul>
       </nav>
 
-      {/* 사이드바 푸터 */}
-      <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-green-200/50 bg-white/80 backdrop-blur-sm">
+      {/* 사이드바 푸터 - 맨 아래 고정 */}
+      <div className="p-6 border-t border-green-200/50 bg-white/80 backdrop-blur-sm flex-shrink-0">
         <div className="flex items-center space-x-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl shadow-sm">
           <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center shadow-lg">
-            <span className="text-white text-lg font-bold">U</span>
+            <span className="text-white text-lg font-bold">
+              {user ? user.name.charAt(0).toUpperCase() : 'U'}
+            </span>
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-green-800 truncate">
-              사용자
+              {user ? user.name : '사용자'}
             </p>
-            <p className="text-xs text-green-600 truncate">user@example.com</p>
+            <p className="text-xs text-green-600 truncate">
+              {user ? user.email : 'user@example.com'}
+            </p>
           </div>
           <button className="p-2 text-green-600 hover:text-green-700 hover:bg-white/60 rounded-xl transition-all duration-200">
             <svg

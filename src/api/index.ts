@@ -5,6 +5,7 @@ export { default as apiClient, api, updateApiConfig } from './apiClient';
 
 // 서비스들
 export { default as MemberService } from './memberService';
+export { default as DocumentService } from './services/documentService';
 
 // 타입 정의
 export * from '../types/api';
