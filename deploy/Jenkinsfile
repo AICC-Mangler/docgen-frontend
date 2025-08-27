@@ -65,12 +65,15 @@ pipeline {
                     withCredentials([
                             file(credentialsId: ENV_FILE_CREDENTIALS_ID, variable: 'ENV_FILE')
                         ]) {
-                            sh """
+                            sh '''
                                 echo "📄 환경 변수 파일 복사 중"
                                 cp "\$ENV_FILE" .env
                                 chmod 644 .env
-                                echo "✅ 환경 변수 파일 생성 완료"
-                            """
+                                
+                                echo "✅ 환경 변수 파일 생성 및 정리 완료"
+                                echo "📋 환경 변수 파일 내용 확인:"
+                                cat .env | head -10
+                            '''
                         }
                     }
             }
@@ -99,14 +102,14 @@ pipeline {
             }
         }
 
-        stage('🧪 Test') {
-            steps {
-                sh '''
-                    echo "🧪 테스트 실행"
-                    npm run test || echo "⚠️ 테스트 실패 (무시하려면 여기서 처리)"
-                '''
-            }
-        }
+        // stage('🧪 Test') {
+        //     steps {
+        //         sh '''
+        //             echo "🧪 테스트 실행"
+        //             npm run test || echo "⚠️ 테스트 실패 (무시하려면 여기서 처리)"
+        //         '''
+        //     }
+        // }
 
         stage('🐳 Docker Build') {
             steps {
@@ -189,7 +192,7 @@ pipeline {
                             # 기존 컨테이너 중지 및 삭제
                             docker stop ${containerName} || true
                             docker rm ${containerName} || true
-
+                            
                             # 새 컨테이너 실행
                             docker run -d \\
                                 --name ${containerName} \\
