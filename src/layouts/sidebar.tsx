@@ -7,13 +7,14 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle }) => {
   const [activeMenu, setActiveMenu] = useState('dashboard');
+  const [searchTerm, setSearchTerm] = useState('');
 
   const menuItems = [
     {
       id: 'dashboard',
       label: '대시보드',
       icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5a2 2 0 012-2h4a2 2 0 012 2v6H8V5z" />
         </svg>
@@ -21,27 +22,27 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle }) => {
     },
     {
       id: 'documents',
-      label: '문서 관리',
+      label: '문서 목록',
       icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
         </svg>
       ),
     },
     {
-      id: 'templates',
-      label: '템플릿',
+      id: 'notices',
+      label: '공지사항',
       icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
         </svg>
       ),
     },
     {
-      id: 'settings',
-      label: '설정',
+      id: 'hashtag',
+      label: '해시태그',
       icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
         </svg>
@@ -49,18 +50,33 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle }) => {
     },
   ];
 
+  // 검색 처리 함수
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log('검색어:', searchTerm);
+    // 여기에 검색 로직을 구현하세요
+  }
+
   return (
-    <aside className={`bg-white border-r border-green-200 w-64 min-h-screen transition-all duration-300 z-40${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+    <aside className={`bg-gradient-to-b from-white to-green-50/30 border-r border-green-200/50 w-96 h-[calc(100vh-80px-80px)] transition-all duration-300 z-40 backdrop-blur-sm shadow-xl${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
       {/* 사이드바 헤더 */}
-      <div className="p-4 border-b border-green-200">
+      <div className="p-8 border-b border-green-200/50 bg-gradient-to-r from-green-600 to-emerald-600">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-green-700">Docgen</h2>
+          <div className="flex items-center space-x-4">
+            <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+              <span className="text-white font-bold text-2xl">D</span>
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-white">Docgen</h2>
+              <p className="text-green-100 text-sm">Document Management</p>
+            </div>
+          </div>
           {onToggle && (
             <button
               onClick={onToggle}
-              className="p-1 text-green-600 hover:text-green-700 hover:bg-green-50 rounded transition-colors"
+              className="p-2 text-white/80 hover:text-white hover:bg-white/20 rounded-xl transition-all duration-200"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
@@ -68,21 +84,44 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle }) => {
         </div>
       </div>
 
+      {/* 검색 텍스트 창*/}
+      <div className='p-6 border-b border-green-200/50'>
+        <form onSubmit={handleSearch} className='relative'>
+          <div className="relative">
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder='검색어를 입력하세요...'
+              className='w-full pl-12 pr-4 py-4 border border-green-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-300 text-sm bg-white/60 backdrop-blur-sm shadow-sm hover:shadow-md transition-all duration-200'/>
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+               <svg className="h-5 w-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+            </div>
+          </div>
+        </form>
+      </div>       
+
       {/* 네비게이션 메뉴 */}
-      <nav className="p-4">
-        <ul className="space-y-2">
+      <nav className="p-6">
+        <ul className="space-y-3">
           {menuItems.map((item) => (
             <li key={item.id}>
               <button
                 onClick={() => setActiveMenu(item.id)}
-                className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors ${
+                className={`w-full flex items-center space-x-4 px-6 py-4 rounded-2xl transition-all duration-200 group ${
                   activeMenu === item.id
-                    ? 'bg-green-100 text-green-700 border border-green-300'
-                    : 'text-gray-600 hover:bg-green-50 hover:text-green-700'
+                    ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg transform scale-105'
+                    : 'text-gray-700 hover:bg-white/60 hover:text-green-700 hover:shadow-md hover:transform hover:scale-105'
                 }`}
               >
-                <span className="flex-shrink-0">{item.icon}</span>
-                <span className="font-medium">{item.label}</span>
+                <span className={`flex-shrink-0 transition-all duration-200 ${
+                  activeMenu === item.id ? 'text-white' : 'text-green-600 group-hover:text-green-700'
+                }`}>
+                  {item.icon}
+                </span>
+                <span className="font-semibold text-lg">{item.label}</span>
               </button>
             </li>
           ))}
@@ -90,15 +129,21 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle }) => {
       </nav>
 
       {/* 사이드바 푸터 */}
-      <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-green-200">
-        <div className="flex items-center space-x-3 p-3 bg-green-50 rounded-lg">
-          <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center">
-            <span className="text-white text-sm font-semibold">U</span>
+      <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-green-200/50 bg-white/80 backdrop-blur-sm">
+        <div className="flex items-center space-x-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl shadow-sm">
+          <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center shadow-lg">
+            <span className="text-white text-lg font-bold">U</span>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-green-700 truncate">사용자</p>
+            <p className="text-sm font-semibold text-green-800 truncate">사용자</p>
             <p className="text-xs text-green-600 truncate">user@example.com</p>
           </div>
+          <button className="p-2 text-green-600 hover:text-green-700 hover:bg-white/60 rounded-xl transition-all duration-200">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          </button>
         </div>
       </div>
     </aside>
