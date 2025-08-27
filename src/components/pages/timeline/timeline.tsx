@@ -1,6 +1,8 @@
 import React from 'react';
+import { useParams } from 'react-router-dom';
 
-const Documents: React.FC = () => {
+const TimelineDetail: React.FC = () => {
+  const { projectId } = useParams();
   const timeline = [
     {
       id: 1,
@@ -33,9 +35,9 @@ const Documents: React.FC = () => {
       <div className="bg-white rounded-2xl shadow-sm border border-green-200/50 p-8">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">타임라인</h1>
+            <h1 className="text-3xl font-bold text-gray-800 mb-2">타임라인 - 프로젝트 {projectId}</h1>
             <p className="text-gray-600">
-              프로젝트 관련 모든 타임라인을 관리하세요.
+              프로젝트 {projectId}의 타임라인을 관리하세요.
             </p>
           </div>
           <button className="px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-medium rounded-xl hover:from-green-700 hover:to-emerald-700 transition-all duration-200 shadow-md hover:shadow-lg">
@@ -55,10 +57,24 @@ const Documents: React.FC = () => {
         </div>
 
         {/* 타임라인 */}
-        <div className="overflow-x-auto"></div>
+        <div className="overflow-x-auto">
+          <div className="space-y-4">
+            {timeline.map((item) => (
+              <div key={item.id} className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-800">{item.title}</h3>
+                    <p className="text-sm text-gray-600">{item.description}</p>
+                  </div>
+                  <span className="text-xs text-gray-500">{item.event_date}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
 };
 
-export default Documents;
+export default TimelineDetail;
