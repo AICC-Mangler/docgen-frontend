@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  MemberService} 
-   from '../api';
+import { MemberService } from '../api';
 
-import type {Member, 
-  CreateMemberDto, 
-  UpdateMemberDto, 
-  MemberRole 
+import type {
+  Member,
+  CreateMemberDto,
+  UpdateMemberDto,
+  MemberRole,
 } from '../api';
 
 const MemberTest: React.FC = () => {
@@ -112,8 +111,13 @@ const MemberTest: React.FC = () => {
     try {
       setLoading(true);
       setError('');
-      const updatedMember = await MemberService.updateMember(selectedMember.id, updateMember);
-      setMembers(members.map(m => m.id === updatedMember.id ? updatedMember : m));
+      const updatedMember = await MemberService.updateMember(
+        selectedMember.id,
+        updateMember,
+      );
+      setMembers(
+        members.map((m) => (m.id === updatedMember.id ? updatedMember : m)),
+      );
       setSelectedMember(updatedMember);
       setSuccessMessage(`멤버 ${updatedMember.name}이 수정되었습니다.`);
     } catch (err: any) {
@@ -131,7 +135,7 @@ const MemberTest: React.FC = () => {
       setLoading(true);
       setError('');
       await MemberService.deleteMember(id);
-      setMembers(members.filter(m => m.id !== id));
+      setMembers(members.filter((m) => m.id !== id));
       if (selectedMember?.id === id) {
         setSelectedMember(null);
       }
@@ -146,43 +150,76 @@ const MemberTest: React.FC = () => {
   return (
     <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
       <h1>독젠 백엔드 API 테스트</h1>
-      
+
       {/* 상태 메시지 */}
-      {loading && <div style={{ color: 'blue', marginBottom: '10px' }}>로딩 중...</div>}
-      {error && <div style={{ color: 'red', marginBottom: '10px' }}>❌ {error}</div>}
-      {successMessage && <div style={{ color: 'green', marginBottom: '10px' }}>✅ {successMessage}</div>}
+      {loading && (
+        <div style={{ color: 'blue', marginBottom: '10px' }}>로딩 중...</div>
+      )}
+      {error && (
+        <div style={{ color: 'red', marginBottom: '10px' }}>❌ {error}</div>
+      )}
+      {successMessage && (
+        <div style={{ color: 'green', marginBottom: '10px' }}>
+          ✅ {successMessage}
+        </div>
+      )}
 
       <div style={{ display: 'flex', gap: '20px' }}>
         {/* 왼쪽: 멤버 목록 */}
         <div style={{ flex: 1 }}>
           <h2>멤버 목록</h2>
-          <button onClick={loadMembers} disabled={loading} style={{ marginBottom: '10px' }}>
+          <button
+            onClick={loadMembers}
+            disabled={loading}
+            style={{ marginBottom: '10px' }}
+          >
             목록 새로고침
           </button>
-          
-          <div style={{ border: '1px solid #ccc', borderRadius: '4px', maxHeight: '400px', overflowY: 'auto' }}>
+
+          <div
+            style={{
+              border: '1px solid #ccc',
+              borderRadius: '4px',
+              maxHeight: '400px',
+              overflowY: 'auto',
+            }}
+          >
             {members.length === 0 ? (
-              <div style={{ padding: '20px', textAlign: 'center' }}>멤버가 없습니다.</div>
+              <div style={{ padding: '20px', textAlign: 'center' }}>
+                멤버가 없습니다.
+              </div>
             ) : (
-              members.map(member => (
+              members.map((member) => (
                 <div
                   key={member.id}
                   style={{
                     padding: '10px',
                     borderBottom: '1px solid #eee',
-                    backgroundColor: selectedMember?.id === member.id ? '#f0f8ff' : 'white'
+                    backgroundColor:
+                      selectedMember?.id === member.id ? '#f0f8ff' : 'white',
                   }}
                 >
-                  <div style={{ fontWeight: 'bold' }}>{member.name} ({member.role})</div>
-                  <div style={{ fontSize: '14px', color: '#666' }}>{member.email}</div>
+                  <div style={{ fontWeight: 'bold' }}>
+                    {member.name} ({member.role})
+                  </div>
+                  <div style={{ fontSize: '14px', color: '#666' }}>
+                    {member.email}
+                  </div>
                   <div style={{ marginTop: '5px' }}>
-                    <button onClick={() => handleGetMember(member.id)} disabled={loading}>
+                    <button
+                      onClick={() => handleGetMember(member.id)}
+                      disabled={loading}
+                    >
                       상세 조회
                     </button>
-                    <button 
-                      onClick={() => handleDeleteMember(member.id)} 
+                    <button
+                      onClick={() => handleDeleteMember(member.id)}
                       disabled={loading}
-                      style={{ marginLeft: '5px', backgroundColor: '#ff4444', color: 'white' }}
+                      style={{
+                        marginLeft: '5px',
+                        backgroundColor: '#ff4444',
+                        color: 'white',
+                      }}
                     >
                       삭제
                     </button>
@@ -196,13 +233,22 @@ const MemberTest: React.FC = () => {
         {/* 오른쪽 상단: 새 멤버 생성 */}
         <div style={{ flex: 1 }}>
           <h2>새 멤버 생성</h2>
-          <form onSubmit={handleCreateMember} style={{ border: '1px solid #ccc', padding: '15px', borderRadius: '4px' }}>
+          <form
+            onSubmit={handleCreateMember}
+            style={{
+              border: '1px solid #ccc',
+              padding: '15px',
+              borderRadius: '4px',
+            }}
+          >
             <div style={{ marginBottom: '10px' }}>
               <label>이름:</label>
               <input
                 type="text"
                 value={newMember.name}
-                onChange={(e) => setNewMember({ ...newMember, name: e.target.value })}
+                onChange={(e) =>
+                  setNewMember({ ...newMember, name: e.target.value })
+                }
                 required
                 maxLength={10}
                 style={{ width: '100%', padding: '5px', marginTop: '2px' }}
@@ -213,7 +259,9 @@ const MemberTest: React.FC = () => {
               <input
                 type="email"
                 value={newMember.email}
-                onChange={(e) => setNewMember({ ...newMember, email: e.target.value })}
+                onChange={(e) =>
+                  setNewMember({ ...newMember, email: e.target.value })
+                }
                 required
                 maxLength={50}
                 style={{ width: '100%', padding: '5px', marginTop: '2px' }}
@@ -223,12 +271,16 @@ const MemberTest: React.FC = () => {
               <label>역할:</label>
               <select
                 value={newMember.role}
-                onChange={(e) => setNewMember({ ...newMember, role: e.target.value as MemberRole })}
+                onChange={(e) =>
+                  setNewMember({
+                    ...newMember,
+                    role: e.target.value as MemberRole,
+                  })
+                }
                 style={{ width: '100%', padding: '5px', marginTop: '2px' }}
               >
                 <option value="USER">USER</option>
                 <option value="ADMIN">ADMIN</option>
-                <option value="MODERATOR">MODERATOR</option>
               </select>
             </div>
             <div style={{ marginBottom: '15px' }}>
@@ -236,14 +288,25 @@ const MemberTest: React.FC = () => {
               <input
                 type="password"
                 value={newMember.password}
-                onChange={(e) => setNewMember({ ...newMember, password: e.target.value })}
+                onChange={(e) =>
+                  setNewMember({ ...newMember, password: e.target.value })
+                }
                 required
                 minLength={6}
                 maxLength={255}
                 style={{ width: '100%', padding: '5px', marginTop: '2px' }}
               />
             </div>
-            <button type="submit" disabled={loading} style={{ width: '100%', padding: '10px', backgroundColor: '#007bff', color: 'white' }}>
+            <button
+              type="submit"
+              disabled={loading}
+              style={{
+                width: '100%',
+                padding: '10px',
+                backgroundColor: '#007bff',
+                color: 'white',
+              }}
+            >
               멤버 생성
             </button>
           </form>
@@ -252,8 +315,21 @@ const MemberTest: React.FC = () => {
           {selectedMember && (
             <>
               <h2 style={{ marginTop: '20px' }}>멤버 수정</h2>
-              <form onSubmit={handleUpdateMember} style={{ border: '1px solid #ccc', padding: '15px', borderRadius: '4px' }}>
-                <div style={{ marginBottom: '10px', fontSize: '14px', color: '#666' }}>
+              <form
+                onSubmit={handleUpdateMember}
+                style={{
+                  border: '1px solid #ccc',
+                  padding: '15px',
+                  borderRadius: '4px',
+                }}
+              >
+                <div
+                  style={{
+                    marginBottom: '10px',
+                    fontSize: '14px',
+                    color: '#666',
+                  }}
+                >
                   선택된 멤버: {selectedMember.name} (ID: {selectedMember.id})
                 </div>
                 <div style={{ marginBottom: '10px' }}>
@@ -261,7 +337,9 @@ const MemberTest: React.FC = () => {
                   <input
                     type="text"
                     value={updateMember.name || ''}
-                    onChange={(e) => setUpdateMember({ ...updateMember, name: e.target.value })}
+                    onChange={(e) =>
+                      setUpdateMember({ ...updateMember, name: e.target.value })
+                    }
                     maxLength={10}
                     style={{ width: '100%', padding: '5px', marginTop: '2px' }}
                   />
@@ -271,7 +349,12 @@ const MemberTest: React.FC = () => {
                   <input
                     type="email"
                     value={updateMember.email || ''}
-                    onChange={(e) => setUpdateMember({ ...updateMember, email: e.target.value })}
+                    onChange={(e) =>
+                      setUpdateMember({
+                        ...updateMember,
+                        email: e.target.value,
+                      })
+                    }
                     maxLength={50}
                     style={{ width: '100%', padding: '5px', marginTop: '2px' }}
                   />
@@ -280,15 +363,28 @@ const MemberTest: React.FC = () => {
                   <label>역할:</label>
                   <select
                     value={updateMember.role || 'USER'}
-                    onChange={(e) => setUpdateMember({ ...updateMember, role: e.target.value as MemberRole })}
+                    onChange={(e) =>
+                      setUpdateMember({
+                        ...updateMember,
+                        role: e.target.value as MemberRole,
+                      })
+                    }
                     style={{ width: '100%', padding: '5px', marginTop: '2px' }}
                   >
                     <option value="USER">USER</option>
                     <option value="ADMIN">ADMIN</option>
-                    <option value="MODERATOR">MODERATOR</option>
                   </select>
                 </div>
-                <button type="submit" disabled={loading} style={{ width: '100%', padding: '10px', backgroundColor: '#28a745', color: 'white' }}>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  style={{
+                    width: '100%',
+                    padding: '10px',
+                    backgroundColor: '#28a745',
+                    color: 'white',
+                  }}
+                >
                   멤버 수정
                 </button>
               </form>
