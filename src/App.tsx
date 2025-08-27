@@ -7,14 +7,16 @@ import Footer from './layouts/footer';
 function App() {
   const envTest = import.meta.env.VITE_ENV_TEST;
   return (
-    <div>
+    <div className="min-h-screen flex flex-col">
       <Header/>
-      <main>
-        <h1>envTest : {envTest}</h1>
-        <MemberTest />
+      <main className="flex-1 p-6">
+        <div className="max-w-4xl mx-auto">
+          <h1 className="text-2xl font-bold mb-4">envTest : {envTest}</h1>
+          <MemberTest />
+        </div>
       </main>
       <Footer/>
-      </div>
+    </div>
   );
 }
 
