@@ -9,7 +9,8 @@ import Notices from './components/pages/notice';
 import Hashtag from './components/pages/hashtag';
 import MemberTest from './components/page';
 import { useSidebarStore } from './stores/useSidebarStore';
-import RequirementDocumentViewer from './components/pages/requirementDocumentViewer';
+import RequirementDocumentViewer from './components/pages/document/requirementDocumentViewer';
+import DocumentRequest from './components/pages/document/documentRequest';
 
 function App() {
   const { isOpen, toggle } = useSidebarStore();
@@ -36,6 +37,10 @@ function App() {
                 <Route
                   path="/prd-viewer-test"
                   element={<RequirementDocumentViewer />}
+                />
+                <Route
+                  path="/request-prd"
+                  element={<DocumentRequest />}
                 />
               </Routes>
             </div>
