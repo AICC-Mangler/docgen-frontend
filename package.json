@@ -11,12 +11,15 @@
     "format": "prettier --write \"src/**/*.tsx\""
   },
   "dependencies": {
+    "@handsontable/react": "^16.0.1",
     "@reduxjs/toolkit": "2.8.2",
     "axios": "^1.11.0",
+    "handsontable": "^16.0.1",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-redux": "9.2.0",
     "react-router-dom": "7.8.2",
+    "xlsx": "^0.18.5",
     "zustand": "^5.0.8"
   },
   "devDependencies": {

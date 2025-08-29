@@ -9,6 +9,7 @@ import Notices from './components/pages/notice';
 import Hashtag from './components/pages/hashtag';
 import MemberTest from './components/page';
 import { useSidebarStore } from './stores/useSidebarStore';
+import RequirementDocumentViewer from './components/pages/requirementDocumentViewer';
 
 function App() {
   const { isOpen, toggle } = useSidebarStore();
@@ -32,6 +33,10 @@ function App() {
                 <Route path="/notices" element={<Notices />} />
                 <Route path="/hashtag" element={<Hashtag />} />
                 <Route path="/member-test" element={<MemberTest />} />
+                <Route
+                  path="/prd-viewer-test"
+                  element={<RequirementDocumentViewer />}
+                />
               </Routes>
             </div>
           </main>
