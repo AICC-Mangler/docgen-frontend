@@ -1,16 +1,40 @@
-import React, { useState } from 'react';
-//import { useParams } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import Modal from '../../common/Modal';
 import TimelineCreateModal from './TimelineCreateModal';
 import '../../../styles/main.css';
+import { useTimelineStore } from '../../../stores/useTimelineStore';
 
 const TimelineDetail: React.FC = () => {
-  // const { projectId } = useParams();
+  const { projectId1 } = useParams();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedTimeline, setSelectedTimeline] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState('');
+
+  console.log('projectId1 = ' + projectId1);
+  const { projects, isLoading, error, fetchTimelineByProjectId, clearError } =
+    useTimelineStore();
+
+  const projectId = 1;
+
+  useEffect(() => {
+    const loadTimelines = async () => {
+      try {
+        await fetchTimelineByProjectId(projectId);
+      } catch (error) {
+        console.error('프로젝트 로딩 실패:', error);
+      }
+    };
+
+    loadTimelines();
+
+    // 컴포넌트 언마운트 시 에러 초기화
+    return () => {
+      clearError();
+    };
+  }, [fetchTimelineByProjectId, clearError, projectId]);
 
   const handleTimelineSubmit = (data: any) => {
     console.log('새 타임라인 생성:', data);
