@@ -17,10 +17,10 @@ interface ApiResponse<T> {
 // Timeline 타입 (백엔드와 일치)
 interface Timeline {
   id: number;
-  member_id: number;
+  project_id: number;
   title: string;
-  introduction: string;
-  project_status: 'COMPLETED' | 'IN_PROGRESS' | 'PENDING';
+  description: string;
+  event_date: string;
   created_date_time: string;
   updated_date_time: string;
 }
@@ -41,14 +41,13 @@ interface UpdateTimelineDto {
 
 interface TimelineState {
   // 상태
-  projects: Timeline[];
+  timelines: Timeline[];
   currentTimeline: Timeline | null;
   isLoading: boolean;
   error: string | null;
 
   // 액션
-  fetchTimelineByProjectId: (projectId: number) => Promise<void>;
-  fetchTimelineById: (id: number) => Promise<void>;
+  fetchTimelinesByProjectId: (id: number) => Promise<void>;
   createTimeline: (projectData: CreateTimelineDto) => Promise<void>;
   updateTimeline: (id: number, projectData: UpdateTimelineDto) => Promise<void>;
   deleteTimeline: (id: number) => Promise<void>;
@@ -58,7 +57,7 @@ interface TimelineState {
 }
 
 const initialState = {
-  projects: [],
+  timelines: [],
   currentTimeline: null,
   isLoading: false,
   error: null,
@@ -69,13 +68,13 @@ export const useTimelineStore = create<TimelineState>()(
     (set, get) => ({
       ...initialState,
 
-      // 프로젝트 목록 조회
-      fetchTimelineByProjectId: async (projectId: number) => {
+      // 타임라인 목록 조회
+      fetchTimelinesByProjectId: async (projectId: number) => {
         set({ isLoading: true, error: null });
         try {
-          console.log('useStore ongoing');
+          console.log('fetchTimelinesByProjectId ongoing');
           const response = await fetch(
-            `${API_BASE_URL}/timeline?id=${projectId}`,
+            `${API_BASE_URL}/timelines/projects/?id=${projectId}`,
             {
               mode: 'cors',
               credentials: 'include',
@@ -85,152 +84,28 @@ export const useTimelineStore = create<TimelineState>()(
             },
           );
           if (!response.ok) {
-            console.log('useStore fail');
+            console.log('fetchTimelinesByProjectId fail');
             throw new Error(`HTTP error! status: ${response.status}`);
           }
           const result: ApiResponse<Timeline[]> = await response.json();
           if (result.success) {
-            console.log('useStore success');
-            set({ projects: result.data, isLoading: false });
+            console.log('fetchTimelinesByProjectId success');
+            set({ timelines: result.data, isLoading: false });
           } else {
-            console.log('useStore fail2');
+            console.log('fetchTimelinesByProjectId fail2');
             throw new Error(result.message);
           }
         } catch (error) {
           const errorMessage =
             error instanceof Error
               ? error.message
-              : '프로젝트 목록 조회에 실패했습니다.';
+              : '타임라인 목록 조회에 실패했습니다.';
           console.log('errorMessage = ' + errorMessage);
           set({ error: errorMessage, isLoading: false });
         }
       },
 
-      // 특정 프로젝트 조회
-      fetchTimelineById: async (id: number) => {
-        set({ isLoading: true, error: null });
-        try {
-          const response = await fetch(`${API_BASE_URL}/projects/${id}`);
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-          const result: ApiResponse<Timeline> = await response.json();
-          if (result.success) {
-            set({ currentTimeline: result.data, isLoading: false });
-          } else {
-            throw new Error(result.message);
-          }
-        } catch (error) {
-          const errorMessage =
-            error instanceof Error
-              ? error.message
-              : '프로젝트 조회에 실패했습니다.';
-          set({ error: errorMessage, isLoading: false });
-        }
-      },
-
-      // 프로젝트 생성
-      createTimeline: async (projectData: CreateTimelineDto) => {
-        set({ isLoading: true, error: null });
-        try {
-          const response = await fetch(`${API_BASE_URL}/projects`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(projectData),
-          });
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-          const result: ApiResponse<Timeline> = await response.json();
-          if (result.success) {
-            set((state) => ({
-              projects: [...state.projects, result.data],
-              isLoading: false,
-            }));
-          } else {
-            throw new Error(result.message);
-          }
-        } catch (error) {
-          const errorMessage =
-            error instanceof Error
-              ? error.message
-              : '프로젝트 생성에 실패했습니다.';
-          set({ error: errorMessage, isLoading: false });
-        }
-      },
-
-      // 프로젝트 수정
-      updateTimeline: async (id: number, projectData: UpdateTimelineDto) => {
-        set({ isLoading: true, error: null });
-        try {
-          const response = await fetch(`${API_BASE_URL}/projects/${id}`, {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(projectData),
-          });
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-          const result: ApiResponse<Timeline> = await response.json();
-          if (result.success) {
-            set((state) => ({
-              projects: state.projects.map((project) =>
-                project.id === id ? result.data : project,
-              ),
-              currentTimeline:
-                state.currentTimeline?.id === id
-                  ? result.data
-                  : state.currentTimeline,
-              isLoading: false,
-            }));
-          } else {
-            throw new Error(result.message);
-          }
-        } catch (error) {
-          const errorMessage =
-            error instanceof Error
-              ? error.message
-              : '프로젝트 수정에 실패했습니다.';
-          set({ error: errorMessage, isLoading: false });
-        }
-      },
-
-      // 프로젝트 삭제
-      deleteTimeline: async (id: number) => {
-        set({ isLoading: true, error: null });
-        try {
-          const response = await fetch(`${API_BASE_URL}/projects/${id}`, {
-            method: 'DELETE',
-          });
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-          const result: ApiResponse<{ success: boolean; message: string }> =
-            await response.json();
-          if (result.success) {
-            set((state) => ({
-              projects: state.projects.filter((project) => project.id !== id),
-              currentTimeline:
-                state.currentTimeline?.id === id ? null : state.currentTimeline,
-              isLoading: false,
-            }));
-          } else {
-            throw new Error(result.message);
-          }
-        } catch (error) {
-          const errorMessage =
-            error instanceof Error
-              ? error.message
-              : '프로젝트 삭제에 실패했습니다.';
-          set({ error: errorMessage, isLoading: false });
-        }
-      },
-
-      // 현재 프로젝트 설정
+      // 현재 타임라인 설정
       setCurrentTimeline: (project: Timeline | null) => {
         set({ currentTimeline: project });
       },

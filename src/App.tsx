@@ -35,7 +35,10 @@ function App() {
                 <Route path="/notices" element={<Notices />} />
                 <Route path="/hashtag" element={<Hashtag />} />
                 <Route path="/timelines" element={<Timeline />} />
-                <Route path="/timeline/:projectId" element={<TimelineDetail />} />
+                <Route
+                  path="/timelines/projects/:id"
+                  element={<TimelineDetail />}
+                />
                 <Route path="/member-test" element={<MemberTest />} />
                 <Route
                   path="/prd-viewer-test"

@@ -76,7 +76,7 @@ const Documents: React.FC = () => {
             projects.map((project) => (
               <Link
                 key={project.id}
-                to={`/timeline/${project.id}`}
+                to={`/timelines/projects/${project.id}`}
                 className="flex-1 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer block transition-colors"
               >
                 <h3 className="text-lg font-semibold text-gray-800 mb-1">

@@ -14,15 +14,16 @@ const TimelineDetail: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
 
   console.log('projectId1 = ' + projectId1);
-  const { projects, isLoading, error, fetchTimelineByProjectId, clearError } =
+
+  const { timelines, isLoading, error, fetchTimelinesByProjectId, clearError } =
     useTimelineStore();
 
-  const projectId = 1;
+  const projectId = 2;
 
   useEffect(() => {
     const loadTimelines = async () => {
       try {
-        await fetchTimelineByProjectId(projectId);
+        await fetchTimelinesByProjectId(projectId);
       } catch (error) {
         console.error('프로젝트 로딩 실패:', error);
       }
@@ -34,7 +35,7 @@ const TimelineDetail: React.FC = () => {
     return () => {
       clearError();
     };
-  }, [fetchTimelineByProjectId, clearError, projectId]);
+  }, [fetchTimelinesByProjectId, clearError, projectId]);
 
   const handleTimelineSubmit = (data: any) => {
     console.log('새 타임라인 생성:', data);
@@ -63,40 +64,35 @@ const TimelineDetail: React.FC = () => {
     setIsDeleteModalOpen(true);
   };
 
-  const timeline = [
-    {
-      id: 1,
-      title: '프로젝트 계획서',
-      description: '기획',
-      event_date: '2025-01-15',
-    },
-    {
-      id: 2,
-      title: '회의록 - 1월 정기회의',
-      description: '회의',
-      event_date: '2025-01-14',
-    },
-    {
-      id: 3,
-      title: '인터뷰 내용 정리',
-      description:
-        '10명의 잠재 고객과 인터뷰를 진행했습니다. 기존 검색 기능에 대한 불만족도가 높고, AI 추천 기능에 대한 기대도가 높습니다. 판매자 인증 시스템의 중요성도 확인되었으며, 이 피드백을 바탕으로 기능 우선순위를 재조정해야 합니다.',
-      event_date: '2025.08.07',
-    },
-    {
-      id: 4,
-      title: '프로젝트 미팅 완료',
-      description:
-        'AI 마켓플레이스 프로젝트 킥오프 미팅을 오늘 진행했습니다. 프로젝트 목표와 일정을 팀원들과 공유하고 각자의 역할을 명확히 했습니다.',
-      event_date: '2025.08.05',
-    },
-  ];
+  // 로딩 상태 처리
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="bg-white rounded-2xl shadow-sm border border-green-200/50 p-8">
+          <div className="flex justify-center items-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500"></div>
+            <span className="ml-3 text-gray-600">
+              프로젝트 목록을 불러오는 중...
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
-  const filteredTimeline = timeline.filter(
-    (item) =>
-      item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.description.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
+  // 에러 상태 처리
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div className="bg-white rounded-2xl shadow-sm border border-red-200/50 p-8">
+          <div className="text-center py-12">
+            <div className="text-red-500 text-xl mb-4">오류가 발생했습니다</div>
+            <div className="text-gray-600 mb-6">{error}</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -144,7 +140,7 @@ const TimelineDetail: React.FC = () => {
 
         {/* 세로 타임라인 */}
         <div className="relative">
-          {filteredTimeline.map((item) => (
+          {timelines.map((item: any) => (
             <div key={item.id} className="flex items-start mb-8 last:mb-0">
               {/* 선택 아이콘 */}
               <div className="flex-shrink-0 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center mr-4 mt-2">
