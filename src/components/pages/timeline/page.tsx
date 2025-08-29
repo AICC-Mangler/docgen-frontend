@@ -1,9 +1,9 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import '../../../styles/main.css';
 
 const Documents: React.FC = () => {
-  const navigate = useNavigate();
-  const timeline = [
+  const project = [
     {
       id: 1,
       title: '프로젝트 계획서',
@@ -36,25 +36,26 @@ const Documents: React.FC = () => {
         <div className="flex justify-between items-center mb-6">
           <div>
             <h1 className="text-3xl font-bold text-gray-800 mb-2">타임라인</h1>
-            <p className="text-gray-600">
-              프로젝트를 선택해 주세요.
-            </p>
+            <p className="text-gray-600">프로젝트를 선택해 주세요.</p>
           </div>
         </div>
 
         {/* 프로젝트 선택 */}
         <div className="flex flex-col gap-4 mb-6 text-gray-600">
-          {timeline.map((item) => (
-                         <div key={item.id} className="flex-1 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer" onClick={() => navigate(`/timeline/${item.id}`)}>
-              <h3 className="text-lg font-semibold text-gray-800 mb-1">{item.title}</h3>
+          {project.map((item) => (
+            <Link
+              key={item.id}
+              to={`/timeline/${item.id}`}
+              className="flex-1 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer block"
+            >
+              <h3 className="text-lg font-semibold text-gray-800 mb-1">
+                {item.title}
+              </h3>
               <p className="text-sm text-gray-600 mb-2">{item.description}</p>
               <p className="text-xs text-gray-500">{item.event_date}</p>
-            </div>
+            </Link>
           ))}
         </div>
-
-        {/* 타임라인 */}
-        <div className="overflow-x-auto"></div>
       </div>
     </div>
   );
