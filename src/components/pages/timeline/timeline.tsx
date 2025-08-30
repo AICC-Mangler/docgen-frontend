@@ -72,7 +72,7 @@ const TimelineDetail: React.FC = () => {
           <div className="flex justify-center items-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500"></div>
             <span className="ml-3 text-gray-600">
-              프로젝트 목록을 불러오는 중...
+              타임라인 목록을 불러오는 중...
             </span>
           </div>
         </div>
