@@ -15,6 +15,7 @@ const MyPage: React.FC = () => {
     openWithdrawModal,
     openMyPagePasswordModal,
     isMyPagePasswordModalOpen,
+    isPasswordVerified: modalPasswordVerified,
   } = useModalStore();
   const [activeSubSection, setActiveSubSection] =
     useState<string>('profile-edit');
@@ -48,21 +49,23 @@ const MyPage: React.FC = () => {
   useEffect(() => {
     if (!isAuthenticated) {
       navigate('/login');
-    } else if (!isPasswordVerified) {
+    } else if (!modalPasswordVerified) {
       // 로그인은 되어 있지만 비밀번호 확인이 안 된 경우
       openMyPagePasswordModal();
     }
-  }, [isAuthenticated, navigate, isPasswordVerified, openMyPagePasswordModal]);
+  }, [
+    isAuthenticated,
+    navigate,
+    modalPasswordVerified,
+    openMyPagePasswordModal,
+  ]);
 
-  // 비밀번호 확인 모달이 닫힐 때 처리
+  // 비밀번호 확인 상태 동기화
   useEffect(() => {
-    if (!isMyPagePasswordModalOpen && !isPasswordVerified && isAuthenticated) {
-      // 비밀번호 확인 모달이 닫혔는데 아직 확인이 안 된 경우
-      // 모달이 닫힌 시점에서 비밀번호 확인이 성공했다고 가정
-      // (실제로는 API 응답으로 판단해야 함)
+    if (modalPasswordVerified && !isPasswordVerified) {
       setIsPasswordVerified(true);
     }
-  }, [isMyPagePasswordModalOpen, isPasswordVerified, isAuthenticated]);
+  }, [modalPasswordVerified, isPasswordVerified]);
 
   // 로그인하지 않은 경우 로딩 화면 표시
   if (!isAuthenticated) {
@@ -74,11 +77,6 @@ const MyPage: React.FC = () => {
         </div>
       </div>
     );
-  }
-
-  // 비밀번호 확인이 안 된 경우 비밀번호 확인 모달만 표시
-  if (!isPasswordVerified) {
-    return <MyPagePasswordModal />;
   }
 
   // 임시 사용자 데이터 (실제로는 API에서 가져올 예정)
@@ -1463,62 +1461,75 @@ const MyPage: React.FC = () => {
   };
 
   return (
-    <div className="flex gap-8">
-      {/* 사이드바 */}
-      <div className="w-64 flex-shrink-0">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-          <div className="p-6">
-            <h1 className="text-xl font-bold text-black mb-6">마이페이지</h1>
-
-            <nav className="space-y-6">
-              {sidebarItems.map((section) => (
-                <div key={section.section}>
-                  <h3 className="text-sm font-semibold text-gray-900 mb-3">
-                    {section.title}
-                  </h3>
-                  <ul className="space-y-2">
-                    {section.items.map((item) => (
-                      <li key={item.id}>
-                        <button
-                          onClick={() => setActiveSubSection(item.id)}
-                          className={`w-full text-left px-3 py-2 text-sm rounded-lg transition-colors duration-200 ${
-                            activeSubSection === item.id
-                              ? 'bg-blue-50 text-blue-700 font-medium'
-                              : 'bg-white text-black hover:bg-blue-50 hover:text-blue-700 hover:font-medium'
-                          }`}
-                        >
-                          {item.label}
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </nav>
+    <>
+      {!isPasswordVerified ? (
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">마이페이지 로딩 중...</p>
           </div>
         </div>
-      </div>
+      ) : (
+        <div className="flex gap-8">
+          {/* 사이드바 */}
+          <div className="w-64 flex-shrink-0">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+              <div className="p-6">
+                <h1 className="text-xl font-bold text-black mb-6">
+                  마이페이지
+                </h1>
 
-      {/* 메인 콘텐츠 */}
-      <div className="flex-1">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
-          {renderMainContent()}
+                <nav className="space-y-6">
+                  {sidebarItems.map((section) => (
+                    <div key={section.section}>
+                      <h3 className="text-sm font-semibold text-gray-900 mb-3">
+                        {section.title}
+                      </h3>
+                      <ul className="space-y-2">
+                        {section.items.map((item) => (
+                          <li key={item.id}>
+                            <button
+                              onClick={() => setActiveSubSection(item.id)}
+                              className={`w-full text-left px-3 py-2 text-sm rounded-lg transition-colors duration-200 ${
+                                activeSubSection === item.id
+                                  ? 'bg-blue-50 text-blue-700 font-medium'
+                                  : 'bg-white text-black hover:bg-blue-50 hover:text-blue-700 hover:font-medium'
+                              }`}
+                            >
+                              {item.label}
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </nav>
+              </div>
+            </div>
+          </div>
+
+          {/* 메인 콘텐츠 */}
+          <div className="flex-1">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+              {renderMainContent()}
+            </div>
+          </div>
+
+          {/* 멤버십 해지 모달 */}
+          <MembershipCancelModal
+            isOpen={isMembershipCancelModalOpen}
+            onClose={handleMembershipCancelClose}
+            onConfirm={handleMembershipCancelConfirm}
+          />
+
+          {/* 회원 탈퇴 모달 */}
+          <WithdrawModal />
         </div>
-      </div>
-
-      {/* 멤버십 해지 모달 */}
-      <MembershipCancelModal
-        isOpen={isMembershipCancelModalOpen}
-        onClose={handleMembershipCancelClose}
-        onConfirm={handleMembershipCancelConfirm}
-      />
+      )}
 
       {/* 비밀번호 확인 모달 */}
       <MyPagePasswordModal />
-
-      {/* 회원 탈퇴 모달 */}
-      <WithdrawModal />
-    </div>
+    </>
   );
 };
 

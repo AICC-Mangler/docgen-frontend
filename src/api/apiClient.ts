@@ -36,11 +36,11 @@ apiClient.interceptors.request.use(
     );
 
     // 여기에서 Authorization 헤더 추가 가능
-    // const token = localStorage.getItem('accessToken');
-    // if (token) {
-    //   config.headers = config.headers || {};
-    //   config.headers.Authorization = `Bearer ${token}`;
-    // }
+    const token = localStorage.getItem('accessToken');
+    if (token) {
+      config.headers = config.headers || {};
+      config.headers.Authorization = `${token}`;
+    }
 
     return config;
   },

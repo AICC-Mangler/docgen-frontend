@@ -5,6 +5,7 @@ interface ModalState {
   isLoginModalOpen: boolean;
   isMyPagePasswordModalOpen: boolean;
   isWithdrawModalOpen: boolean;
+  isPasswordVerified: boolean;
   signUpStep: 'agreement' | 'form';
   withdrawCompleteCallback?: () => void;
   openSignUpModal: () => void;
@@ -13,6 +14,7 @@ interface ModalState {
   closeLoginModal: () => void;
   openMyPagePasswordModal: () => void;
   closeMyPagePasswordModal: () => void;
+  setPasswordVerified: (verified: boolean) => void;
   openWithdrawModal: (callback?: () => void) => void;
   closeWithdrawModal: () => void;
   nextSignUpStep: () => void;
@@ -24,6 +26,7 @@ export const useModalStore = create<ModalState>((set) => ({
   isLoginModalOpen: false,
   isMyPagePasswordModalOpen: false,
   isWithdrawModalOpen: false,
+  isPasswordVerified: false,
   signUpStep: 'agreement',
   openSignUpModal: () =>
     set({ isSignUpModalOpen: true, signUpStep: 'agreement' }),
@@ -33,6 +36,8 @@ export const useModalStore = create<ModalState>((set) => ({
   closeLoginModal: () => set({ isLoginModalOpen: false }),
   openMyPagePasswordModal: () => set({ isMyPagePasswordModalOpen: true }),
   closeMyPagePasswordModal: () => set({ isMyPagePasswordModalOpen: false }),
+  setPasswordVerified: (verified: boolean) =>
+    set({ isPasswordVerified: verified }),
   openWithdrawModal: (callback?: () => void) =>
     set({
       isWithdrawModalOpen: true,

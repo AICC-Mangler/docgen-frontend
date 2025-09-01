@@ -4,6 +4,8 @@ import Modal from '../../common/Modal';
 import ProjectCreateModal from './ProjectCreateModal';
 import '../../../styles/main.css';
 import { useProjectStore } from '../../../stores/useProjectStore';
+import ProtectedRoute from '../../common/ProtectedRoute';
+import { useAuthenticationStore } from '../../../stores/useAuthenticationStore';
 
 const Project: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -22,7 +24,8 @@ const Project: React.FC = () => {
     clearError,
   } = useProjectStore();
 
-  const memberId = 1; // 임시로 하드코딩, 실제로는 로그인한 사용자 ID
+  const { user } = useAuthenticationStore();
+  const memberId = user?.id || 0;
 
   useEffect(() => {
     const loadProjects = async () => {
@@ -312,4 +315,10 @@ const Project: React.FC = () => {
   );
 };
 
-export default Project;
+const ProjectPage = () => (
+  <ProtectedRoute>
+    <Project />
+  </ProtectedRoute>
+);
+
+export default ProjectPage;
