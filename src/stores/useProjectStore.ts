@@ -95,6 +95,7 @@ export const useProjectStore = create<ProjectState>()(
           const result: ApiResponse<Project[]> = await response.json();
           if (result.success) {
             console.log('fetchProjectsByMemberId success');
+            console.log('result.data = ' + result.data[0]);
             set({ projects: result.data, isLoading: false });
           } else {
             console.log('fetchProjectsByMemberId fail2');

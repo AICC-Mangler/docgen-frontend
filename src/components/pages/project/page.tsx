@@ -71,7 +71,7 @@ const Project: React.FC = () => {
 
   const handleProjectEdit = async (data: any) => {
     console.log('프로젝트 수정:', data);
-
+    console.log('projects=' + projects);
     try {
       await updateProject(selectedProject.id, {
         title: data.title,
