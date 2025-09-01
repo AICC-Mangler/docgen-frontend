@@ -16,8 +16,8 @@ const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
   const [formData, setFormData] = useState({
     title: '',
     introduction: '',
-    hashtags: '',
     project_status: 'PENDING',
+    hashtags: '',
   });
 
   useEffect(() => {
@@ -25,8 +25,8 @@ const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
       setFormData({
         title: initialData.title || '',
         introduction: initialData.introduction || '',
-        hashtags: initialData.hashtags ? initialData.hashtags.join(', ') : '',
         project_status: initialData.project_status || 'PENDING',
+        hashtags: initialData.hashtags ? initialData.hashtags.join(', ') : '',
       });
     }
   }, [isEditMode, initialData]);
@@ -35,15 +35,22 @@ const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
     e.preventDefault();
     const submitData = {
       ...formData,
-      hashtags: formData.hashtags.split(',').map(tag => tag.trim()).filter(tag => tag),
+      hashtags: formData.hashtags
+        .split(',')
+        .map((tag) => tag.trim())
+        .filter((tag) => tag),
     };
     onSubmit(submitData);
     onClose();
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
@@ -52,7 +59,10 @@ const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div>
-        <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
+        <label
+          htmlFor="title"
+          className="block text-sm font-medium text-gray-700 mb-2"
+        >
           프로젝트 제목 *
         </label>
         <input
@@ -68,7 +78,10 @@ const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
       </div>
 
       <div>
-        <label htmlFor="introduction" className="block text-sm font-medium text-gray-700 mb-2">
+        <label
+          htmlFor="introduction"
+          className="block text-sm font-medium text-gray-700 mb-2"
+        >
           프로젝트 소개 *
         </label>
         <textarea
@@ -84,7 +97,10 @@ const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
       </div>
 
       <div>
-        <label htmlFor="hashtags" className="block text-sm font-medium text-gray-700 mb-2">
+        <label
+          htmlFor="hashtags"
+          className="block text-sm font-medium text-gray-700 mb-2"
+        >
           해시태그
         </label>
         <input
@@ -94,12 +110,18 @@ const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
           value={formData.hashtags}
           onChange={handleChange}
           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
-          placeholder="쉼표로 구분하여 입력하세요 (예: 건축, 기획, AI)"
+          placeholder="쉼표로 구분하여 입력하세요 (예: AI, 건축, 기획)"
         />
+        <p className="text-sm text-gray-500 mt-1">
+          쉼표로 구분하여 여러 해시태그를 입력할 수 있습니다.
+        </p>
       </div>
 
       <div>
-        <label htmlFor="project_status" className="block text-sm font-medium text-gray-700 mb-2">
+        <label
+          htmlFor="project_status"
+          className="block text-sm font-medium text-gray-700 mb-2"
+        >
           프로젝트 상태 *
         </label>
         <select

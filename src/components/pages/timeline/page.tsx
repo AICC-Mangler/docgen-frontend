@@ -4,7 +4,7 @@ import '../../../styles/main.css';
 import { useProjectStore } from '../../../stores';
 
 const Documents: React.FC = () => {
-  const { projects, isLoading, error, fetchProjectByMemberId, clearError } =
+  const { projects, isLoading, error, fetchProjectsByMemberId, clearError } =
     useProjectStore();
 
   const memberId = 1;
@@ -12,7 +12,7 @@ const Documents: React.FC = () => {
   useEffect(() => {
     const loadProjects = async () => {
       try {
-        await fetchProjectByMemberId(memberId);
+        await fetchProjectsByMemberId(memberId);
       } catch (error) {
         console.error('프로젝트 로딩 실패:', error);
       }
@@ -24,7 +24,7 @@ const Documents: React.FC = () => {
     return () => {
       clearError();
     };
-  }, [fetchProjectByMemberId, clearError, memberId]);
+  }, [fetchProjectsByMemberId, clearError, memberId]);
 
   // 로딩 상태 처리
   if (isLoading) {

@@ -20,7 +20,7 @@ interface Timeline {
   project_id: number;
   title: string;
   description: string;
-  event_date: string;
+  event_date: Date;
   created_date_time: string;
   updated_date_time: string;
 }
@@ -29,14 +29,14 @@ interface Timeline {
 interface CreateTimelineDto {
   title: string;
   introduction: string;
-  project_status: 'COMPLETED' | 'IN_PROGRESS' | 'PENDING';
+  event_date: Date;
 }
 
 // Timeline 수정 DTO
 interface UpdateTimelineDto {
   title?: string;
-  introduction?: string;
-  project_status?: 'COMPLETED' | 'IN_PROGRESS' | 'PENDING';
+  description?: string;
+  event_date?: string;
 }
 
 interface TimelineState {
@@ -102,6 +102,105 @@ export const useTimelineStore = create<TimelineState>()(
               : '타임라인 목록 조회에 실패했습니다.';
           console.log('errorMessage = ' + errorMessage);
           set({ error: errorMessage, isLoading: false });
+        }
+      },
+
+      createTimeline: async (timelineData: CreateTimelineDto) => {
+        set({ isLoading: true, error: null });
+        try {
+          const response = await fetch(`${API_BASE_URL}/timelines`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(timelineData),
+          });
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          const result: ApiResponse<Timeline> = await response.json();
+          if (result.success) {
+            set((state) => ({
+              timelines: [...state.timelines, result.data],
+              isLoading: false,
+            }));
+          } else {
+            throw new Error(result.message);
+          }
+        } catch (error) {
+          const errorMessage =
+            error instanceof Error
+              ? error.message
+              : '타임라인 생성에 실패했습니다.';
+          set({ error: errorMessage, isLoading: false });
+        }
+      },
+
+      updateTimeline: async (id: number, timelineData: UpdateTimelineDto) => {
+        set({ isLoading: true, error: null });
+        try {
+          const response = await fetch(`${API_BASE_URL}/timelines/${id}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(timelineData),
+          });
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          const result: ApiResponse<Timeline> = await response.json();
+          if (result.success) {
+            set((state) => ({
+              timelines: state.timelines.map((timeline) =>
+                timeline.id === id ? result.data : timeline,
+              ),
+              isLoading: false,
+            }));
+          } else {
+            throw new Error(result.message);
+          }
+        } catch (error) {
+          const errorMessage =
+            error instanceof Error
+              ? error.message
+              : '타임라인 수정에 실패했습니다.';
+          set({ error: errorMessage, isLoading: false });
+          throw error;
+        }
+      },
+
+      deleteTimeline: async (id: number) => {
+        set({ isLoading: true, error: null });
+        try {
+          const response = await fetch(`${API_BASE_URL}/timelines/${id}`, {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          const result: ApiResponse<{ success: boolean; message: string }> =
+            await response.json();
+          if (result.success) {
+            set((state) => ({
+              timelines: state.timelines.filter(
+                (timeline) => timeline.id !== id,
+              ),
+              isLoading: false,
+            }));
+          } else {
+            throw new Error(result.message);
+          }
+        } catch (error) {
+          const errorMessage =
+            error instanceof Error
+              ? error.message
+              : '타임라인 삭제에 실패했습니다.';
+          set({ error: errorMessage, isLoading: false });
+          throw error;
         }
       },
 

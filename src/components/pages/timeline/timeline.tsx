@@ -6,24 +6,51 @@ import '../../../styles/main.css';
 import { useTimelineStore } from '../../../stores/useTimelineStore';
 
 const TimelineDetail: React.FC = () => {
-  const { projectId1 } = useParams();
+  const { id } = useParams<{ id: string }>();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedTimeline, setSelectedTimeline] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState('');
 
-  console.log('projectId1 = ' + projectId1);
+  console.log('projectId = ' + id);
 
-  const { timelines, isLoading, error, fetchTimelinesByProjectId, clearError } =
-    useTimelineStore();
+  const {
+    timelines,
+    isLoading,
+    error,
+    fetchTimelinesByProjectId,
+    clearError,
+    createTimeline,
+    updateTimeline,
+    deleteTimeline,
+  } = useTimelineStore();
 
-  const projectId = 2;
+  // projectId가 없으면 에러 처리
+  if (!id) {
+    return (
+      <div className="space-y-6">
+        <div className="bg-white rounded-2xl shadow-sm border border-red-200/50 p-8">
+          <div className="text-center py-12">
+            <div className="text-red-500 text-xl mb-4">
+              프로젝트 ID가 없습니다
+            </div>
+            <div className="text-gray-600 mb-6">
+              올바른 프로젝트를 선택해주세요.
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const projectIdNumber = parseInt(id, 10);
 
   useEffect(() => {
     const loadTimelines = async () => {
       try {
-        await fetchTimelinesByProjectId(projectId);
+        await fetchTimelinesByProjectId(projectIdNumber);
+        console.log('timelines = ' + timelines);
       } catch (error) {
         console.error('프로젝트 로딩 실패:', error);
       }
@@ -35,23 +62,65 @@ const TimelineDetail: React.FC = () => {
     return () => {
       clearError();
     };
-  }, [fetchTimelinesByProjectId, clearError, projectId]);
+  }, [fetchTimelinesByProjectId, clearError, projectIdNumber]);
 
-  const handleTimelineSubmit = (data: any) => {
+  const handleTimelineSubmit = async (data: any) => {
+    data.project_id = projectIdNumber;
     console.log('새 타임라인 생성:', data);
-    // 여기에 API 호출 로직을 추가할 수 있습니다
+
+    try {
+      await createTimeline(data);
+      // 타임라인 생성 성공 후 모달 닫기
+      setIsModalOpen(false);
+      // 목록 새로고침
+      await fetchTimelinesByProjectId(projectIdNumber);
+    } catch (error) {
+      console.error('타임라인 생성 실패:', error);
+    }
+    /**
+     새 타임라인 생성: {
+      title: '타임라인 테스트',
+      description: '타임라인 테스트타임라인 테스트타임라인 테스트타임라인 테스트',
+      event_date: '2025-09-09',
+      project_id: 2,
+      }
+     */
   };
 
-  const handleTimelineEdit = (data: any) => {
+  const handleTimelineEdit = async (data: any) => {
     console.log('타임라인 수정:', data);
-    // 여기에 API 호출 로직을 추가할 수 있습니다
+
+    try {
+      await updateTimeline(data.id, {
+        title: data.title,
+        description: data.description,
+        event_date: data.event_date,
+      });
+      // 타임라인 수정 성공 후 모달 닫기
+      setIsEditModalOpen(false);
+      setSelectedTimeline(null);
+      // 목록 새로고침
+      await fetchTimelinesByProjectId(projectIdNumber);
+    } catch (error) {
+      console.error('타임라인 수정 실패:', error);
+    }
   };
 
-  const handleTimelineDelete = () => {
+  const handleTimelineDelete = async () => {
+    if (!selectedTimeline) return;
+
     console.log('타임라인 삭제:', selectedTimeline);
-    // 여기에 API 호출 로직을 추가할 수 있습니다
-    setIsDeleteModalOpen(false);
-    setSelectedTimeline(null);
+
+    try {
+      await deleteTimeline(selectedTimeline.id);
+      // 타임라인 삭제 성공 후 모달 닫기
+      setIsDeleteModalOpen(false);
+      setSelectedTimeline(null);
+      // 목록 새로고침
+      await fetchTimelinesByProjectId(projectIdNumber);
+    } catch (error) {
+      console.error('타임라인 삭제 실패:', error);
+    }
   };
 
   const openEditModal = (timeline: any) => {

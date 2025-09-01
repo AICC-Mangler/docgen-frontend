@@ -1,13 +1,13 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 
-// API 기본 URL 설정 (직접 백엔드 호출)
+// API 기본 URL 설정
 const API_BASE_URL =
   import.meta.env.VITE_BACKEND_DEV_URL ||
   import.meta.env.VITE_BACKEND_LOCAL_URL ||
   'http://localhost:3100';
 
-// 백엔드 API 응답 타입 (간단하게 정의)
+// 백엔드 API 응답 타입
 interface ApiResponse<T> {
   success: boolean;
   data: T;
@@ -23,13 +23,16 @@ interface Project {
   project_status: 'COMPLETED' | 'IN_PROGRESS' | 'PENDING';
   created_date_time: string;
   updated_date_time: string;
+  hashtags?: string[];
 }
 
 // Project 생성 DTO
 interface CreateProjectDto {
+  member_id: number;
   title: string;
   introduction: string;
   project_status: 'COMPLETED' | 'IN_PROGRESS' | 'PENDING';
+  hashtags?: string[];
 }
 
 // Project 수정 DTO
@@ -37,6 +40,7 @@ interface UpdateProjectDto {
   title?: string;
   introduction?: string;
   project_status?: 'COMPLETED' | 'IN_PROGRESS' | 'PENDING';
+  hashtags?: string[];
 }
 
 interface ProjectState {
@@ -47,7 +51,7 @@ interface ProjectState {
   error: string | null;
 
   // 액션
-  fetchProjectByMemberId: (memberId: number) => Promise<void>;
+  fetchProjectsByMemberId: (memberId: number) => Promise<void>;
   fetchProjectById: (id: number) => Promise<void>;
   createProject: (projectData: CreateProjectDto) => Promise<void>;
   updateProject: (id: number, projectData: UpdateProjectDto) => Promise<void>;
@@ -69,13 +73,13 @@ export const useProjectStore = create<ProjectState>()(
     (set, get) => ({
       ...initialState,
 
-      // 프로젝트 목록 조회
-      fetchProjectByMemberId: async (memberId: number) => {
+      // 프로젝트 목록 조회 (멤버별)
+      fetchProjectsByMemberId: async (memberId: number) => {
         set({ isLoading: true, error: null });
         try {
-          console.log('useStore ongoing');
+          console.log('fetchProjectsByMemberId ongoing');
           const response = await fetch(
-            `${API_BASE_URL}/projects?id=${memberId}`,
+            `${API_BASE_URL}/projects/?id=${memberId}`,
             {
               mode: 'cors',
               credentials: 'include',
@@ -85,15 +89,15 @@ export const useProjectStore = create<ProjectState>()(
             },
           );
           if (!response.ok) {
-            console.log('useStore fail');
+            console.log('fetchProjectsByMemberId fail');
             throw new Error(`HTTP error! status: ${response.status}`);
           }
           const result: ApiResponse<Project[]> = await response.json();
           if (result.success) {
-            console.log('useStore success');
+            console.log('fetchProjectsByMemberId success');
             set({ projects: result.data, isLoading: false });
           } else {
-            console.log('useStore fail2');
+            console.log('fetchProjectsByMemberId fail2');
             throw new Error(result.message);
           }
         } catch (error) {
@@ -106,11 +110,17 @@ export const useProjectStore = create<ProjectState>()(
         }
       },
 
-      // 특정 프로젝트 조회
+      // 단일 프로젝트 조회
       fetchProjectById: async (id: number) => {
         set({ isLoading: true, error: null });
         try {
-          const response = await fetch(`${API_BASE_URL}/projects/${id}`);
+          const response = await fetch(`${API_BASE_URL}/projects/${id}`, {
+            mode: 'cors',
+            credentials: 'include',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
           }
@@ -158,6 +168,7 @@ export const useProjectStore = create<ProjectState>()(
               ? error.message
               : '프로젝트 생성에 실패했습니다.';
           set({ error: errorMessage, isLoading: false });
+          throw error;
         }
       },
 
@@ -181,10 +192,7 @@ export const useProjectStore = create<ProjectState>()(
               projects: state.projects.map((project) =>
                 project.id === id ? result.data : project,
               ),
-              currentProject:
-                state.currentProject?.id === id
-                  ? result.data
-                  : state.currentProject,
+              currentProject: result.data,
               isLoading: false,
             }));
           } else {
@@ -196,6 +204,7 @@ export const useProjectStore = create<ProjectState>()(
               ? error.message
               : '프로젝트 수정에 실패했습니다.';
           set({ error: errorMessage, isLoading: false });
+          throw error;
         }
       },
 
@@ -205,6 +214,9 @@ export const useProjectStore = create<ProjectState>()(
         try {
           const response = await fetch(`${API_BASE_URL}/projects/${id}`, {
             method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+            },
           });
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -227,6 +239,7 @@ export const useProjectStore = create<ProjectState>()(
               ? error.message
               : '프로젝트 삭제에 실패했습니다.';
           set({ error: errorMessage, isLoading: false });
+          throw error;
         }
       },
 
