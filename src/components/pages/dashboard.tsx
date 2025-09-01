@@ -1,6 +1,7 @@
 import React from 'react';
 import { useUserStore } from '../../stores/useUserStore';
 import { useNotificationStore } from '../../stores/useNotificationStore';
+import ProtectedRoute from '../common/ProtectedRoute';
 
 const Dashboard: React.FC = () => {
   const { user, login, logout } = useUserStore();
@@ -203,4 +204,10 @@ const Dashboard: React.FC = () => {
   );
 };
 
-export default Dashboard;
+const DashboardPage = () => (
+  <ProtectedRoute>
+    <Dashboard />
+  </ProtectedRoute>
+);
+
+export default DashboardPage;

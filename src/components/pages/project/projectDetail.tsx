@@ -1,14 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import Modal from '../../common/Modal';
+import ProjectCreateModal from './ProjectCreateModal';
 import '../../../styles/main.css';
 import { useProjectStore } from '../../../stores/useProjectStore';
 
 const ProjectDetail: React.FC = () => {
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [selectedProject, setSelectedProject] = useState<any>(null);
+  const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const [isLoading, setIsLoading] = useState(true);
-
-  const { currentProject, error, fetchProjectById, clearError } =
-    useProjectStore();
+  const {
+    currentProject,
+    isLoading,
+    error,
+    fetchProjectById,
+    updateProject,
+    deleteProject,
+    clearError,
+  } = useProjectStore();
 
   useEffect(() => {
     const loadProject = async () => {
@@ -18,8 +29,6 @@ const ProjectDetail: React.FC = () => {
         await fetchProjectById(parseInt(id, 10));
       } catch (error) {
         console.error('프로젝트 로딩 실패:', error);
-      } finally {
-        setIsLoading(false);
       }
     };
 
@@ -111,6 +120,48 @@ const ProjectDetail: React.FC = () => {
     }
   };
 
+  const openEditModal = (project: any) => {
+    setIsEditModalOpen(true);
+    setSelectedProject(project);
+  };
+
+  const openDeleteModal = (project: any) => {
+    setIsDeleteModalOpen(true);
+    setSelectedProject(project);
+  };
+
+  const handleProjectEdit = async (data: any) => {
+    console.log('handleProjectEdit', data);
+    try {
+      await updateProject(selectedProject.id, {
+        title: data.title,
+        introduction: data.introduction,
+        project_status: data.project_status,
+        hashtags: data.hashtags,
+      });
+      // 프로젝트 수정 성공 후 모달 닫기
+      setIsEditModalOpen(false);
+      setSelectedProject(null);
+    } catch (error) {
+      console.error('프로젝트 수정 실패:', error);
+    }
+  };
+
+  const handleProjectDelete = async () => {
+    if (!selectedProject) return;
+
+    console.log('프로젝트 삭제:', selectedProject);
+
+    try {
+      await deleteProject(selectedProject.id);
+      setIsDeleteModalOpen(false);
+      setSelectedProject(null);
+      navigate('/projects');
+    } catch (error) {
+      console.error('프로젝트 삭제 실패:', error);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center">
@@ -197,13 +248,88 @@ const ProjectDetail: React.FC = () => {
               >
                 타임라인 보기
               </Link>
-              <button className="w-full px-4 py-3 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors duration-200">
-                문서 관리
+              <button
+                className="w-full px-4 py-3 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors duration-200"
+                onClick={() => openEditModal(currentProject)}
+                title="수정"
+              >
+                프로젝트 수정
+              </button>
+
+              <button
+                className="w-full px-4 py-3 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors duration-200"
+                onClick={() => openDeleteModal(currentProject)}
+                title="삭제"
+              >
+                프로젝트 삭제
               </button>
             </div>
           </div>
         </div>
       </div>
+
+      {/* 프로젝트 수정 모달 */}
+      <Modal
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setSelectedProject(null);
+        }}
+        title="프로젝트 수정"
+        size="lg"
+      >
+        <ProjectCreateModal
+          onClose={() => {
+            setIsEditModalOpen(false);
+            setSelectedProject(null);
+          }}
+          onSubmit={handleProjectEdit}
+          isEditMode={true}
+          initialData={selectedProject}
+        />
+      </Modal>
+
+      {/* 프로젝트 삭제 확인 모달 */}
+      <Modal
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setSelectedProject(null);
+        }}
+        title="프로젝트 삭제"
+        size="md"
+      >
+        <div className="space-y-6">
+          <div className="text-center">
+            <p className="text-gray-700 mb-4">
+              <strong>"{selectedProject?.title}"</strong> 프로젝트를
+              삭제하시겠습니까?
+            </p>
+            <p className="text-sm text-gray-500">
+              이 작업은 되돌릴 수 없습니다.
+            </p>
+          </div>
+          <div className="flex justify-end space-x-3 pt-4">
+            <button
+              type="button"
+              onClick={() => {
+                setIsDeleteModalOpen(false);
+                setSelectedProject(null);
+              }}
+              className="px-6 py-3 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors duration-200 font-medium"
+            >
+              취소
+            </button>
+            <button
+              type="button"
+              onClick={handleProjectDelete}
+              className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors duration-200 font-medium"
+            >
+              삭제
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };

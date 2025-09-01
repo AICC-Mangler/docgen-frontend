@@ -2,8 +2,11 @@ import React, { useState } from 'react';
 import { useModalStore } from '../../../stores/useModalStore';
 
 const MyPagePasswordModal: React.FC = () => {
-  const { isMyPagePasswordModalOpen, closeMyPagePasswordModal } =
-    useModalStore();
+  const {
+    isMyPagePasswordModalOpen,
+    closeMyPagePasswordModal,
+    setPasswordVerified,
+  } = useModalStore();
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -31,9 +34,9 @@ const MyPagePasswordModal: React.FC = () => {
       // 임시로 1초 후 성공 처리
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      // 비밀번호 확인 성공 시 모달 닫기
+      // 비밀번호 확인 성공 시 상태 업데이트 및 모달 닫기
+      setPasswordVerified(true);
       closeMyPagePasswordModal();
-      // 마이페이지는 이미 열려있으므로 추가 이동 불필요
     } catch {
       setError('비밀번호가 올바르지 않습니다.');
     } finally {

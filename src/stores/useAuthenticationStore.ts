@@ -115,10 +115,65 @@ export const useAuthenticationStore = create<AuthenticationState>()(
               accessToken,
               refreshToken,
               user: null,
-              isLoading: false,
+              isLoading: true, // 사용자 정보를 가져오는 동안 로딩 상태
               error: null,
             }
           : initialState;
+
+      // 토큰이 있으면 사용자 정보를 자동으로 가져오기
+      if (accessToken && refreshToken) {
+        const fetchUserInfo = async () => {
+          try {
+            const userId = extractUserIdFromToken(accessToken);
+            if (userId) {
+              const userResponse = await fetch(
+                `${API_BASE_URL}/member/${userId}`,
+                {
+                  method: 'GET',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${accessToken}`,
+                  },
+                },
+              );
+
+              if (userResponse.ok) {
+                const userResult = await userResponse.json();
+                if (userResult.statusCode === 200) {
+                  const userInfo = {
+                    id: userResult.data.id,
+                    name: userResult.data.name,
+                    email: userResult.data.email,
+                    role: userResult.data.role,
+                  };
+
+                  set({
+                    user: userInfo,
+                    isLoading: false,
+                  });
+                  console.log(
+                    '🔄 새로고침 시 사용자 정보 복원 완료:',
+                    userInfo,
+                  );
+                } else {
+                  throw new Error(userResult.message);
+                }
+              } else {
+                throw new Error('사용자 정보 조회에 실패했습니다.');
+              }
+            }
+          } catch (error) {
+            console.error('사용자 정보 복원 실패:', error);
+            // 사용자 정보 복원 실패 시 로그아웃 처리
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            set(initialState);
+          }
+        };
+
+        // 비동기로 사용자 정보 가져오기
+        fetchUserInfo();
+      }
 
       return {
         ...initialStateWithToken,
