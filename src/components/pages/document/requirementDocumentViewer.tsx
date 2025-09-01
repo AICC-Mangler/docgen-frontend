@@ -4,6 +4,8 @@ import Handsontable from 'handsontable';
 import * as XLSX from 'xlsx';
 import 'handsontable/dist/handsontable.full.css';
 import { api } from '../../../api';
+import { useParams } from 'react-router-dom';
+import { API_BASE_URL } from '../../../api/apiClient';
 
 const test_url = 'http://localhost:3100/document/requirement/file/68b007e231b920ebbad0910b'
 
@@ -25,9 +27,11 @@ const RequirementDocumentViewer: React.FC = () => {
     mergeCells: [],
     colHeader: [],
   })
+  const {document_id} = useParams();
+  const document_url = `/document/requirement/file/${document_id}`
   useEffect(() => {
     const fetchExcel = async () => {
-      const response = await api.get(`/document/requirement/file/68b007e231b920ebbad0910b`,{
+      const response = await api.get(document_url,{
         responseType: 'arraybuffer'
       })
 
@@ -59,12 +63,13 @@ const RequirementDocumentViewer: React.FC = () => {
   }, []);
 
   const download_btn = ()=>{
-    location.href = test_url
+    location.href = `${API_BASE_URL}${document_url}`
   }
 
   return (
     <div>
       <button className='bg-green-600 text-white shadow-md' onClick={download_btn}>download</button>
+      <div className='overflow-y-scroll h-[600px]'>
       <HotTable
         data={tableData.data.slice(1)}
         colHeaders={tableData.colHeader}
@@ -92,6 +97,7 @@ const RequirementDocumentViewer: React.FC = () => {
         }}
         className="htMiddle font-bold"
       />
+      </div>
     </div>
   );
 };

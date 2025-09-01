@@ -11,6 +11,7 @@ import MemberTest from './components/page';
 import { useSidebarStore } from './stores/useSidebarStore';
 import RequirementDocumentViewer from './components/pages/document/requirementDocumentViewer';
 import DocumentRequest from './components/pages/document/documentRequest';
+import GenerateDocument from './components/pages/document/GenerateDocument';
 
 function App() {
   const { isOpen, toggle } = useSidebarStore();
@@ -35,13 +36,18 @@ function App() {
                 <Route path="/hashtag" element={<Hashtag />} />
                 <Route path="/member-test" element={<MemberTest />} />
                 <Route
-                  path="/prd-viewer-test"
-                  element={<RequirementDocumentViewer />}
+                  path="/prd-viewer-test/:document_id"
+                  element={<RequirementDocumentViewer/>}
                 />
                 <Route
                   path="/request-prd"
                   element={<DocumentRequest />}
                 />
+                <Route
+                  path="/generate-document"
+                  element={<GenerateDocument />}
+                />
+                
               </Routes>
             </div>
           </main>
