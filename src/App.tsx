@@ -6,8 +6,11 @@ import Sidebar from './layouts/sidebar';
 import Dashboard from './components/pages/dashboard';
 import Documents from './components/pages/document';
 import Notices from './components/pages/notice';
-import Hashtag from './components/pages/hashtag';
+import Project from './components/pages/project/page';
+import ProjectDetail from './components/pages/project/projectDetail';
 import MemberTest from './components/page';
+import Timeline from './components/pages/timeline/page';
+import TimelineDetail from './components/pages/timeline/timeline';
 import { useSidebarStore } from './stores/useSidebarStore';
 import RequirementDocumentViewer from './components/pages/document/requirementDocumentViewer';
 import DocumentRequest from './components/pages/document/documentRequest';
@@ -33,7 +36,13 @@ function App() {
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/documents" element={<Documents />} />
                 <Route path="/notices" element={<Notices />} />
-                <Route path="/hashtag" element={<Hashtag />} />
+                <Route path="/projects" element={<Project />} />
+                <Route path="/projects/:id" element={<ProjectDetail />} />
+                <Route path="/timelines" element={<Timeline />} />
+                <Route
+                  path="/timelines/projects/:id"
+                  element={<TimelineDetail />}
+                />
                 <Route path="/member-test" element={<MemberTest />} />
                 <Route
                   path="/prd-viewer-test/:document_id"
