@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { useUserStore } from '../stores/useUserStore';
+import { useAuthenticationStore } from '../stores/useAuthenticationStore';
 import { useNotificationStore } from '../stores/useNotificationStore';
 
 interface HeaderProps {
@@ -12,11 +12,11 @@ const Header: React.FC<HeaderProps> = ({
   onMenuToggle,
   sidebarOpen = true,
 }) => {
-  const { user, logout } = useUserStore();
+  const { isAuthenticated, signout } = useAuthenticationStore();
   const { unreadCount, markAllAsRead } = useNotificationStore();
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await signout();
     // 로그아웃 후 로그인 페이지로 리다이렉트 등의 로직 추가
   };
 
@@ -119,23 +119,41 @@ const Header: React.FC<HeaderProps> = ({
               )}
             </button>
 
-            {/* 마이페이지 버튼 */}
-            <button className="px-6 py-3 text-sm font-medium text-green-700 bg-white/60 border border-green-200 rounded-xl hover:bg-white hover:shadow-md transition-all duration-200 backdrop-blur-sm">
-              {user ? '마이페이지' : '로그인'}
-            </button>
-
-            {/* 로그아웃/로그인 버튼 */}
-            {user ? (
-              <button
-                onClick={handleLogout}
-                className="px-6 py-3 text-sm font-medium text-white bg-gradient-to-r from-green-600 to-emerald-600 border border-green-600 rounded-xl hover:from-green-700 hover:to-emerald-700 hover:shadow-lg transition-all duration-200 shadow-md"
-              >
-                로그아웃
-              </button>
+            {/* 사용자 인증 상태에 따른 버튼들 */}
+            {isAuthenticated ? (
+              <>
+                {/* 마이페이지 버튼 */}
+                <Link
+                  to="/mypage"
+                  className="px-6 py-3 text-sm font-medium text-green-700 bg-white/60 border border-green-200 rounded-xl hover:bg-white hover:shadow-md transition-all duration-200 backdrop-blur-sm"
+                >
+                  마이페이지
+                </Link>
+                {/* 로그아웃 버튼 */}
+                <button
+                  onClick={handleLogout}
+                  className="px-6 py-3 text-sm font-medium text-white bg-gradient-to-r from-green-600 to-emerald-600 border border-green-600 rounded-xl hover:from-green-700 hover:to-emerald-700 hover:shadow-lg transition-all duration-200 shadow-md"
+                >
+                  로그아웃
+                </button>
+              </>
             ) : (
-              <button className="px-6 py-3 text-sm font-medium text-white bg-gradient-to-r from-green-600 to-emerald-600 border border-green-600 rounded-xl hover:from-green-700 hover:to-emerald-700 hover:shadow-lg transition-all duration-200 shadow-md">
-                로그인
-              </button>
+              <>
+                {/* 회원가입 버튼 */}
+                <Link
+                  to="/signup"
+                  className="px-6 py-3 text-sm font-medium text-green-700 bg-white/60 border border-green-200 rounded-xl hover:bg-white hover:shadow-md transition-all duration-200 backdrop-blur-sm"
+                >
+                  회원가입
+                </Link>
+                {/* 로그인 버튼 */}
+                <Link
+                  to="/login"
+                  className="px-6 py-3 text-sm font-medium text-white bg-gradient-to-r from-green-600 to-emerald-600 border border-green-600 rounded-xl hover:from-green-700 hover:to-emerald-700 hover:shadow-lg transition-all duration-200 shadow-md"
+                >
+                  로그인
+                </Link>
+              </>
             )}
           </div>
         </div>

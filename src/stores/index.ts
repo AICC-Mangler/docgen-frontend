@@ -5,3 +5,5 @@ export { useNotificationStore } from './useNotificationStore';
 export { useProjectStore } from './useProjectStore';
 export { useTimelineStore } from './useTimelineStore';
 export type { Notification } from './useNotificationStore';
+export { useAuthenticationStore } from './useAuthenticationStore';
+// export { useMemberStore } from './useMemberStore';
