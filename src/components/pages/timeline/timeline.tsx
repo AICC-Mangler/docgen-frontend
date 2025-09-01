@@ -1,32 +1,126 @@
-import React, { useState } from 'react';
-//import { useParams } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import Modal from '../../common/Modal';
 import TimelineCreateModal from './TimelineCreateModal';
 import '../../../styles/main.css';
+import { useTimelineStore } from '../../../stores/useTimelineStore';
 
 const TimelineDetail: React.FC = () => {
-  // const { projectId } = useParams();
+  const { id } = useParams<{ id: string }>();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedTimeline, setSelectedTimeline] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState('');
 
-  const handleTimelineSubmit = (data: any) => {
+  console.log('projectId = ' + id);
+
+  const {
+    timelines,
+    isLoading,
+    error,
+    fetchTimelinesByProjectId,
+    clearError,
+    createTimeline,
+    updateTimeline,
+    deleteTimeline,
+  } = useTimelineStore();
+
+  // projectId가 없으면 에러 처리
+  if (!id) {
+    return (
+      <div className="space-y-6">
+        <div className="bg-white rounded-2xl shadow-sm border border-red-200/50 p-8">
+          <div className="text-center py-12">
+            <div className="text-red-500 text-xl mb-4">
+              프로젝트 ID가 없습니다
+            </div>
+            <div className="text-gray-600 mb-6">
+              올바른 프로젝트를 선택해주세요.
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const projectIdNumber = parseInt(id, 10);
+
+  useEffect(() => {
+    const loadTimelines = async () => {
+      try {
+        await fetchTimelinesByProjectId(projectIdNumber);
+        console.log('timelines = ' + timelines);
+      } catch (error) {
+        console.error('프로젝트 로딩 실패:', error);
+      }
+    };
+
+    loadTimelines();
+
+    // 컴포넌트 언마운트 시 에러 초기화
+    return () => {
+      clearError();
+    };
+  }, [fetchTimelinesByProjectId, clearError, projectIdNumber]);
+
+  const handleTimelineSubmit = async (data: any) => {
+    data.project_id = projectIdNumber;
     console.log('새 타임라인 생성:', data);
-    // 여기에 API 호출 로직을 추가할 수 있습니다
+
+    try {
+      await createTimeline(data);
+      // 타임라인 생성 성공 후 모달 닫기
+      setIsModalOpen(false);
+      // 목록 새로고침
+      await fetchTimelinesByProjectId(projectIdNumber);
+    } catch (error) {
+      console.error('타임라인 생성 실패:', error);
+    }
+    /**
+     새 타임라인 생성: {
+      title: '타임라인 테스트',
+      description: '타임라인 테스트타임라인 테스트타임라인 테스트타임라인 테스트',
+      event_date: '2025-09-09',
+      project_id: 2,
+      }
+     */
   };
 
-  const handleTimelineEdit = (data: any) => {
+  const handleTimelineEdit = async (data: any) => {
     console.log('타임라인 수정:', data);
-    // 여기에 API 호출 로직을 추가할 수 있습니다
+
+    try {
+      await updateTimeline(data.id, {
+        title: data.title,
+        description: data.description,
+        event_date: data.event_date,
+      });
+      // 타임라인 수정 성공 후 모달 닫기
+      setIsEditModalOpen(false);
+      setSelectedTimeline(null);
+      // 목록 새로고침
+      await fetchTimelinesByProjectId(projectIdNumber);
+    } catch (error) {
+      console.error('타임라인 수정 실패:', error);
+    }
   };
 
-  const handleTimelineDelete = () => {
+  const handleTimelineDelete = async () => {
+    if (!selectedTimeline) return;
+
     console.log('타임라인 삭제:', selectedTimeline);
-    // 여기에 API 호출 로직을 추가할 수 있습니다
-    setIsDeleteModalOpen(false);
-    setSelectedTimeline(null);
+
+    try {
+      await deleteTimeline(selectedTimeline.id);
+      // 타임라인 삭제 성공 후 모달 닫기
+      setIsDeleteModalOpen(false);
+      setSelectedTimeline(null);
+      // 목록 새로고침
+      await fetchTimelinesByProjectId(projectIdNumber);
+    } catch (error) {
+      console.error('타임라인 삭제 실패:', error);
+    }
   };
 
   const openEditModal = (timeline: any) => {
@@ -39,40 +133,35 @@ const TimelineDetail: React.FC = () => {
     setIsDeleteModalOpen(true);
   };
 
-  const timeline = [
-    {
-      id: 1,
-      title: '프로젝트 계획서',
-      description: '기획',
-      event_date: '2025-01-15',
-    },
-    {
-      id: 2,
-      title: '회의록 - 1월 정기회의',
-      description: '회의',
-      event_date: '2025-01-14',
-    },
-    {
-      id: 3,
-      title: '인터뷰 내용 정리',
-      description:
-        '10명의 잠재 고객과 인터뷰를 진행했습니다. 기존 검색 기능에 대한 불만족도가 높고, AI 추천 기능에 대한 기대도가 높습니다. 판매자 인증 시스템의 중요성도 확인되었으며, 이 피드백을 바탕으로 기능 우선순위를 재조정해야 합니다.',
-      event_date: '2025.08.07',
-    },
-    {
-      id: 4,
-      title: '프로젝트 미팅 완료',
-      description:
-        'AI 마켓플레이스 프로젝트 킥오프 미팅을 오늘 진행했습니다. 프로젝트 목표와 일정을 팀원들과 공유하고 각자의 역할을 명확히 했습니다.',
-      event_date: '2025.08.05',
-    },
-  ];
+  // 로딩 상태 처리
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="bg-white rounded-2xl shadow-sm border border-green-200/50 p-8">
+          <div className="flex justify-center items-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500"></div>
+            <span className="ml-3 text-gray-600">
+              타임라인 목록을 불러오는 중...
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
-  const filteredTimeline = timeline.filter(
-    (item) =>
-      item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.description.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
+  // 에러 상태 처리
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div className="bg-white rounded-2xl shadow-sm border border-red-200/50 p-8">
+          <div className="text-center py-12">
+            <div className="text-red-500 text-xl mb-4">오류가 발생했습니다</div>
+            <div className="text-gray-600 mb-6">{error}</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -120,7 +209,7 @@ const TimelineDetail: React.FC = () => {
 
         {/* 세로 타임라인 */}
         <div className="relative">
-          {filteredTimeline.map((item) => (
+          {timelines.map((item: any) => (
             <div key={item.id} className="flex items-start mb-8 last:mb-0">
               {/* 선택 아이콘 */}
               <div className="flex-shrink-0 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center mr-4 mt-2">
