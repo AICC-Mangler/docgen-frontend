@@ -116,7 +116,7 @@ const WithdrawModal: React.FC = () => {
 
           {/* 헤더 */}
           <div className="text-center mb-6">
-            <h2 className="text-2xl font-bold text-black mb-2">Docgen</h2>
+            <h2 className="text-2xl font-bold text-black mb-2">DocGen</h2>
             <div className="w-16 h-0.5 bg-red-500 mx-auto mb-4"></div>
             <p className="text-sm text-gray-700">
               회원 탈퇴 진행을 위해 비밀번호를 입력해 주세요.
@@ -214,7 +214,7 @@ const WithdrawModal: React.FC = () => {
           {/* 헤더 */}
           <div className="text-center mb-8">
             <div className="flex items-center justify-center mb-4">
-              <h1 className="text-2xl font-bold text-gray-800">Docgen</h1>
+              <h1 className="text-2xl font-bold text-gray-800">DocGen</h1>
             </div>
           </div>
 
@@ -272,7 +272,7 @@ const WithdrawModal: React.FC = () => {
           </button>
           {/* 상단 로고 및 안내 문구 */}
           <div className="text-center mb-6">
-            <h2 className="text-2xl font-bold text-black mb-2">Docgen</h2>
+            <h2 className="text-2xl font-bold text-black mb-2">DocGen</h2>
             <div className="w-16 h-0.5 bg-red-500 mx-auto mb-4"></div>
             <p className="text-sm text-gray-700">
               회원 탈퇴를 신청하기 전, 아래 내용을 꼭 확인해 주세요.

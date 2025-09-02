@@ -49,7 +49,7 @@ const IdFindPage: React.FC = () => {
         {/* 헤더 */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">
-            <h1 className="text-3xl font-bold text-gray-800">Docgen</h1>
+            <h1 className="text-3xl font-bold text-gray-800">DocGen</h1>
           </div>
           <h2 className="text-lg font-semibold text-gray-800 mb-2">
             아이디 찾기

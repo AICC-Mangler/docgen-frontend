@@ -1,32 +1,53 @@
 import React, { useState, useEffect } from 'react';
 
-interface ProjectCreateModalProps {
+enum NoticeType {
+  NOMAL = 'NOMAL',
+  EVENT = 'EVENT',
+}
+
+interface NoticeCreateModalProps {
   onClose: () => void;
   onSubmit: (data: any) => void;
   isEditMode?: boolean;
   initialData?: any;
+  memberId?: number;
 }
 
-const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
+const NoticeCreateModal: React.FC<NoticeCreateModalProps> = ({
   onClose,
   onSubmit,
   isEditMode = false,
   initialData = null,
+  memberId,
 }) => {
   const [formData, setFormData] = useState({
     title: '',
-    introduction: '',
-    project_status: 'PENDING',
-    hashtags: '',
+    content: '',
+    noticetype: NoticeType.NOMAL,
+    post_date: new Date().toISOString().split('T')[0], // YYYY-MM-DD 형식
   });
 
   useEffect(() => {
     if (isEditMode && initialData) {
+      let formattedDate = new Date().toISOString().split('T')[0]; // 기본값
+
+      if (initialData.post_date) {
+        try {
+          // Date 객체이거나 문자열인 경우 처리
+          const date = new Date(initialData.post_date);
+          if (!isNaN(date.getTime())) {
+            formattedDate = date.toISOString().split('T')[0];
+          }
+        } catch (error) {
+          console.error('날짜 변환 오류:', error);
+        }
+      }
+
       setFormData({
         title: initialData.title || '',
-        introduction: initialData.introduction || '',
-        project_status: initialData.project_status || 'PENDING',
-        hashtags: initialData.hashtags ? initialData.hashtags.join(', ') : '',
+        content: initialData.content || '',
+        noticetype: initialData.noticetype || NoticeType.NOMAL,
+        post_date: formattedDate,
       });
     }
   }, [isEditMode, initialData]);
@@ -35,10 +56,7 @@ const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
     e.preventDefault();
     const submitData = {
       ...formData,
-      hashtags: formData.hashtags
-        .split(',')
-        .map((tag) => tag.trim())
-        .filter((tag) => tag),
+      member_id: memberId, // memberId를 포함
     };
     onSubmit(submitData);
     onClose();
@@ -63,7 +81,7 @@ const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
           htmlFor="title"
           className="block text-sm font-medium text-gray-700 mb-2"
         >
-          프로젝트 제목 *
+          공지사항 제목 *
         </label>
         <input
           type="text"
@@ -73,69 +91,65 @@ const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
           onChange={handleChange}
           required
           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
-          placeholder="프로젝트 제목을 입력하세요"
+          placeholder="공지사항 제목을 입력하세요"
         />
       </div>
 
       <div>
         <label
-          htmlFor="introduction"
+          htmlFor="content"
           className="block text-sm font-medium text-gray-700 mb-2"
         >
-          프로젝트 소개 *
+          공지사항 내용 *
         </label>
         <textarea
-          id="introduction"
-          name="introduction"
-          value={formData.introduction}
+          id="content"
+          name="content"
+          value={formData.content}
           onChange={handleChange}
           required
-          rows={4}
+          rows={6}
           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
-          placeholder="프로젝트에 대한 간단한 소개를 입력하세요"
+          placeholder="공지사항 내용을 입력하세요"
         />
       </div>
 
       <div>
         <label
-          htmlFor="hashtags"
+          htmlFor="noticetype"
           className="block text-sm font-medium text-gray-700 mb-2"
         >
-          해시태그
-        </label>
-        <input
-          type="text"
-          id="hashtags"
-          name="hashtags"
-          value={formData.hashtags}
-          onChange={handleChange}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
-          placeholder="쉼표로 구분하여 입력하세요 (예: AI, 건축, 기획)"
-        />
-        <p className="text-sm text-gray-500 mt-1">
-          쉼표로 구분하여 여러 해시태그를 입력할 수 있습니다.
-        </p>
-      </div>
-
-      <div>
-        <label
-          htmlFor="project_status"
-          className="block text-sm font-medium text-gray-700 mb-2"
-        >
-          프로젝트 상태 *
+          공지사항 중요도 *
         </label>
         <select
-          id="project_status"
-          name="project_status"
-          value={formData.project_status}
+          id="noticetype"
+          name="noticetype"
+          value={formData.noticetype}
           onChange={handleChange}
           required
           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
         >
-          <option value="PENDING">대기중</option>
-          <option value="IN_PROGRESS">진행중</option>
-          <option value="COMPLETED">완료</option>
+          <option value={NoticeType.NOMAL}>보통</option>
+          <option value={NoticeType.EVENT}>중요</option>
         </select>
+      </div>
+
+      <div>
+        <label
+          htmlFor="post_date"
+          className="block text-sm font-medium text-gray-700 mb-2"
+        >
+          게시 날짜 *
+        </label>
+        <input
+          type="date"
+          id="post_date"
+          name="post_date"
+          value={formData.post_date}
+          onChange={handleChange}
+          required
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
+        />
       </div>
 
       <div className="flex justify-end space-x-3 pt-4">
@@ -157,4 +171,4 @@ const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
   );
 };
 
-export default ProjectCreateModal;
+export default NoticeCreateModal;

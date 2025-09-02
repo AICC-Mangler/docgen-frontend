@@ -50,7 +50,6 @@ const TimelineDetail: React.FC = () => {
     const loadTimelines = async () => {
       try {
         await fetchTimelinesByProjectId(projectIdNumber);
-        console.log('timelines = ' + timelines);
       } catch (error) {
         console.error('프로젝트 로딩 실패:', error);
       }
