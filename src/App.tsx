@@ -15,6 +15,9 @@ import { useSidebarStore } from './stores/useSidebarStore';
 import RequirementDocumentViewer from './components/pages/document/requirementDocumentViewer';
 import DocumentRequest from './components/pages/document/documentRequest';
 import GenerateDocument from './components/pages/document/GenerateDocument';
+import DocumentList from './components/pages/document/documentList';
+import FunctionalDocumentViewer from './components/pages/document/FunctionalDocumentViewer';
+import PolicyDocumentViewer from './components/pages/document/PolicyDocumentViewer';
 
 function App() {
   const { isOpen, toggle } = useSidebarStore();
@@ -45,18 +48,29 @@ function App() {
                 />
                 <Route path="/member-test" element={<MemberTest />} />
                 <Route
-                  path="/prd-viewer-test/:document_id"
+                  path="/prd-viewer/:document_id"
                   element={<RequirementDocumentViewer/>}
+                />
+                <Route
+                  path="/fsd-viewer/:document_id"
+                  element={<FunctionalDocumentViewer/>}
+                />
+                <Route
+                  path="/spd-viewer/:document_id"
+                  element={<PolicyDocumentViewer/>}
                 />
                 <Route
                   path="/request-prd"
                   element={<DocumentRequest />}
                 />
                 <Route
-                  path="/generate-document"
+                  path="/generate-document/:project_id"
                   element={<GenerateDocument />}
                 />
-                
+                <Route
+                  path="/documentList/:project_id"
+                  element={<DocumentList />}
+                />
               </Routes>
             </div>
           </main>
