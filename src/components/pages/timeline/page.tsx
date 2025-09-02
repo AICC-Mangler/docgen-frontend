@@ -4,7 +4,7 @@ import '../../../styles/main.css';
 import { useProjectStore } from '../../../stores';
 import ProtectedRoute from '../../common/ProtectedRoute';
 import { useAuthenticationStore } from '../../../stores/useAuthenticationStore';
-const Documents: React.FC = () => {
+const Timeline: React.FC = () => {
   const { projects, isLoading, error, fetchProjectsByMemberId, clearError } =
     useProjectStore();
 
@@ -127,7 +127,7 @@ const Documents: React.FC = () => {
 
 const TimelinePage = () => (
   <ProtectedRoute>
-    <Documents />
+    <Timeline />
   </ProtectedRoute>
 );
 

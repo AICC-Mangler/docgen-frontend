@@ -1,8 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuthenticationStore } from '../stores/useAuthenticationStore';
-import { useNotificationStore } from '../stores/useNotificationStore';
-
 interface HeaderProps {
   onMenuToggle?: () => void;
   sidebarOpen?: boolean;
@@ -13,7 +11,6 @@ const Header: React.FC<HeaderProps> = ({
   sidebarOpen = true,
 }) => {
   const { isAuthenticated, signout } = useAuthenticationStore();
-  const { unreadCount, markAllAsRead } = useNotificationStore();
 
   const handleLogout = async () => {
     await signout();
@@ -21,7 +18,7 @@ const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <header className="bg-gradient-to-r from-green-50 to-emerald-50 border-b border-green-200/50 sticky top-0 z-50 backdrop-blur-sm shadow-sm">
+    <header className="bg-gradient-to-r from-green-50 to-emerald-50 border-b border-green-200/50 sticky top-0 z-0 h-[97px] backdrop-blur-sm shadow-sm">
       <div className="max-w-full mx-auto px-8">
         <div className="flex justify-between items-center h-24">
           {/* 좌측: 메뉴 버튼 + 로고 */}
@@ -30,33 +27,11 @@ const Header: React.FC<HeaderProps> = ({
             {!sidebarOpen && onMenuToggle && (
               <button
                 onClick={onMenuToggle}
-                className="p-3 bg-gradient-to-br from-green-500 to-emerald-600 text-white hover:from-green-600 hover:to-emerald-700 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md group"
+                className="p-2.5 bg-gradient-to-br from-green-500 to-emerald-600 text-white hover:from-green-600 hover:to-emerald-700 rounded-lg transition-all duration-300 ease-in-out shadow-sm hover:shadow-md group"
                 title="사이드바 열기"
               >
                 <svg
-                  className="w-6 h-6 transform group-hover:scale-110 transition-transform duration-200"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M13 7l5 5m0 0l-5 5m5-5H6"
-                  />
-                </svg>
-              </button>
-            )}
-
-            {/* 모바일 메뉴 버튼 (사이드바가 열려있을 때만 표시) */}
-            {sidebarOpen && onMenuToggle && (
-              <button
-                onClick={onMenuToggle}
-                className="p-3 text-green-700 hover:text-green-800 hover:bg-white/60 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md md:hidden"
-              >
-                <svg
-                  className="w-6 h-6"
+                  className="w-5 h-5 transform group-hover:scale-110 transition-transform duration-200"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -71,54 +46,47 @@ const Header: React.FC<HeaderProps> = ({
               </button>
             )}
 
+            {/* 모바일 메뉴 버튼 (사이드바가 열려있을 때만 표시) */}
+            {sidebarOpen && onMenuToggle && (
+              <button
+                onClick={onMenuToggle}
+                className="p-2.5 text-green-700 hover:text-green-800 hover:bg-white/60 rounded-lg transition-all duration-300 ease-in-out shadow-sm hover:shadow-md md:hidden"
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            )}
+
             {/* 로고 영역 */}
             <Link
-              to="/dashboard"
+              to="/intro"
               className="hidden md:flex items-center space-x-3 hover:opacity-80 transition-opacity duration-200"
             >
               <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
                 <span className="text-white font-bold text-lg">D</span>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-xl font-bold text-gray-800">DocGen</span>
+                <span className="text-sm text-gray-600 font-medium">
+                  AI가 만드는 스마트한 프로젝트 문서
+                </span>
               </div>
             </Link>
           </div>
 
           {/* 우측 버튼 영역 */}
           <div className="flex items-center space-x-4">
-            {/* 알림 아이콘 */}
-            <button
-              className="p-3 bg-white text-green-700 hover:text-green-800 hover:bg-white/60 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md relative group"
-              onClick={markAllAsRead}
-              title="알림 보기"
-            >
-              <svg
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 8a6 6 0 0112 0c0 7 3 9 3 9H3s3-2 3-9"
-                />
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M10.3 21a1.94 1.94 0 003.4 0"
-                />
-              </svg>
-              {/* 알림 표시기 */}
-              {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 rounded-full border-2 border-white shadow-sm animate-pulse flex items-center justify-center">
-                  <span className="text-xs text-white font-bold">
-                    {unreadCount > 9 ? '9+' : unreadCount}
-                  </span>
-                </span>
-              )}
-            </button>
-
             {/* 사용자 인증 상태에 따른 버튼들 */}
             {isAuthenticated ? (
               <>
@@ -161,4 +129,5 @@ const Header: React.FC<HeaderProps> = ({
     </header>
   );
 };
+
 export default Header;

@@ -8,7 +8,6 @@ import Documents from './components/pages/document';
 import Notices from './components/pages/notice';
 import Project from './components/pages/project/page';
 import ProjectDetail from './components/pages/project/projectDetail';
-import MemberTest from './components/page';
 import Timeline from './components/pages/timeline/page';
 import TimelineDetail from './components/pages/timeline/timeline';
 import { useSidebarStore } from './stores/useSidebarStore';
@@ -52,7 +51,6 @@ function App() {
                   path="/timelines/projects/:id"
                   element={<TimelineDetail />}
                 />
-                <Route path="/member-test" element={<MemberTest />} />
                 <Route
                   path="/prd-viewer-test/:document_id"
                   element={<RequirementDocumentViewer />}

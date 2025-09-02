@@ -65,7 +65,7 @@ const initialState = {
 
 export const useTimelineStore = create<TimelineState>()(
   devtools(
-    (set, get) => ({
+    (set) => ({
       ...initialState,
 
       // 타임라인 목록 조회

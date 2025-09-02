@@ -1,46 +1,9 @@
 import React from 'react';
-import { useUserStore } from '../../stores/useUserStore';
-import { useNotificationStore } from '../../stores/useNotificationStore';
+import { useAuthenticationStore } from '../../stores/useAuthenticationStore';
 import ProtectedRoute from '../common/ProtectedRoute';
 
 const Dashboard: React.FC = () => {
-  const { user, login, logout } = useUserStore();
-  const { addNotification } = useNotificationStore();
-
-  const handleTestLogin = () => {
-    login({
-      id: '1',
-      name: '김철수',
-      email: 'kim@example.com',
-      role: 'ADMIN',
-    });
-
-    addNotification({
-      title: '로그인 성공',
-      message: '김철수님, 환영합니다!',
-      type: 'success',
-      isRead: false,
-    });
-  };
-
-  const handleTestLogout = () => {
-    logout();
-    addNotification({
-      title: '로그아웃',
-      message: '안전하게 로그아웃되었습니다.',
-      type: 'info',
-      isRead: false,
-    });
-  };
-
-  const handleAddTestNotification = () => {
-    addNotification({
-      title: '테스트 알림',
-      message: '이것은 테스트 알림입니다.',
-      type: 'info',
-      isRead: false,
-    });
-  };
+  const { user } = useAuthenticationStore();
 
   return (
     <div className="space-y-6">
@@ -51,31 +14,6 @@ const Dashboard: React.FC = () => {
             <p className="text-gray-600 mb-6">
               문서 관리 시스템의 현황을 한눈에 확인하세요.
             </p>
-          </div>
-
-          {/* 테스트 버튼들 */}
-          <div className="flex space-x-3">
-            {!user ? (
-              <button
-                onClick={handleTestLogin}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
-              >
-                테스트 로그인
-              </button>
-            ) : (
-              <button
-                onClick={handleTestLogout}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200"
-              >
-                테스트 로그아웃
-              </button>
-            )}
-            <button
-              onClick={handleAddTestNotification}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200"
-            >
-              알림 추가
-            </button>
           </div>
         </div>
 
@@ -92,7 +30,7 @@ const Dashboard: React.FC = () => {
         )}
 
         {/* 통계 카드들 */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-6 rounded-2xl border border-green-200/50">
             <div className="flex items-center justify-between">
               <div>
@@ -137,32 +75,6 @@ const Dashboard: React.FC = () => {
                     strokeLinejoin="round"
                     strokeWidth={2}
                     d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-                  />
-                </svg>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-6 rounded-2xl border border-purple-200/50">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-purple-600">
-                  총 멤버 수
-                </p>
-                <p className="text-2xl font-bold text-purple-800">89</p>
-              </div>
-              <div className="w-12 h-12 bg-purple-500/20 rounded-2xl flex items-center justify-center">
-                <svg
-                  className="w-6 h-6 text-purple-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"
                   />
                 </svg>
               </div>

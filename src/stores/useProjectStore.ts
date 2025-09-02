@@ -70,7 +70,7 @@ const initialState = {
 
 export const useProjectStore = create<ProjectState>()(
   devtools(
-    (set, get) => ({
+    (set) => ({
       ...initialState,
 
       // 프로젝트 목록 조회 (멤버별)
