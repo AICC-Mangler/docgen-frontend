@@ -7,8 +7,10 @@ const PolicyDocumentViewer: React.FC = () => {
   const {document_id} = useParams();
 
   return (
-    <div>
-      <SPD_Viewer document_id={document_id}/>
+    <div className="space-y-6">
+      <div className="bg-white rounded-2xl shadow-sm border border-green-200/50 p-8">
+        <SPD_Viewer document_id={document_id}/>
+      </div>
     </div>
   );
 };

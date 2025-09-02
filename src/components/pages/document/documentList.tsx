@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { api } from '../../../api'
 import DocumentListItem from './component/DocumentListItem'
+import { useAuthenticationStore } from '../../../stores'
 
 
 
@@ -37,25 +38,15 @@ const DOCUMENT_TYPES = [{
 }
 ]
 
-const DOCUMENT_DOMAIN = [
-  {
-    name:"requirement_document",
-    domain: "requirement"
-  },{
-    name:"functional_document",
-    domain : "functional"
-  },{
-    name:"policy_document",
-    domain : "policy"
-  }
-]
+
 
 
 const DocumentList = () => {
   const {project_id} = useParams()
   const [documents, setDocuments] = useState<document_dict>();
   const navigate = useNavigate();
-
+  const { user, isLoading: authLoading } = useAuthenticationStore();
+  const memberId = user?.id || 0;
 
   useEffect(()=>{
     loadList();
@@ -92,13 +83,13 @@ const DocumentList = () => {
   }
 
   const requirementViewerHandler = (document_id:string)=>{
-    navigate(`/prd-viewer/${document_id}`)
+    navigate(`/documents/prd_viewer/${document_id}`)
   }
   const functionalViewerHandler = (document_id:string)=>{
-    navigate(`/fsd-viewer/${document_id}`)
+    navigate(`/documents/fsd_viewer/${document_id}`)
   }
   const PolicyViewerHandler = (document_id:string)=>{
-    navigate(`/spd-viewer/${document_id}`)
+    navigate(`/documents/spd_viewer/${document_id}`)
   }
   const DOCUMENT_VIEWER : document_viewer = {
     requirement_document:requirementViewerHandler,
@@ -108,11 +99,11 @@ const DocumentList = () => {
 
   const DOCUMENT_GEN_FUNC : document_generator = {
     requirement_document: (project_id : string)=>{
-      navigate(`/generate-document/${project_id}`)
+      navigate(`/documents/generate/${project_id}`)
     },
     functional_document: (project_id : string)=>{
       const result = api.post("document/functional",{
-        project_id:project_id, owner_id:"test"
+        project_id:project_id, owner_id:`${memberId}`
       })
       console.log(result);
       setTimeout(() => {
@@ -121,7 +112,7 @@ const DocumentList = () => {
     },
     policy_document: (project_id : string)=>{
       const result = api.post("document/policy",{
-        project_id:project_id, owner_id:"test"
+        project_id:project_id, owner_id:`${memberId}`
       })
       console.log(result);
       setTimeout(() => {
@@ -130,9 +121,24 @@ const DocumentList = () => {
     },
   }
 
+  const get_Click_Handler = (status: string, doc_type:string, id: string)=>{
+    if(status ==="error" || status ==="none") return ()=>DOCUMENT_GEN_FUNC[doc_type](project_id||"");
+    if(status ==="finished") return ()=>DOCUMENT_VIEWER[doc_type](id);
+    if(status ==="progress") return ()=>{};
+    return ()=>{}
+  }
+
   return (
-    <div>
-      <div className='m-auto p-2 flex flex-col gap-2 w-[25rem]'>
+    <div className="space-y-6">
+      <div className="bg-white rounded-2xl shadow-sm border border-green-200/50 p-8">
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-800 mb-2">문서 목록</h1>
+          </div>
+        </div>
+
+        <div>
+      <div className='m-auto p-2 flex flex-col gap-2 w-full'>
         {
           documents?DOCUMENT_TYPES.map((doc, idx)=>{
             const docs = documents[doc.name];
@@ -142,7 +148,7 @@ const DocumentList = () => {
                 display={doc.display}
                 create_date={" "}
                 status={"none"}
-                onClick={()=>DOCUMENT_GEN_FUNC[doc.name](project_id||"")}
+                onClick={get_Click_Handler("none", doc.name, "no_id")}
               />
             );
             return(
@@ -151,13 +157,16 @@ const DocumentList = () => {
                 display={doc.display}
                 create_date={docs.create_date.substring(0,10)}
                 status={docs.status}
-                onClick={()=>docs.status==="error"?DOCUMENT_GEN_FUNC[doc.name](project_id||""):DOCUMENT_VIEWER[doc.name](docs.id)}
+                onClick={get_Click_Handler(docs.status, doc.name, docs.id)}
               />
             )
           }):""
         }
       </div>
     </div>
+      </div>
+    </div>
+   
   )
 }
 

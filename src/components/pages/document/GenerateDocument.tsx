@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import DocumentQuestion from './component/documentQuestion';
 import { api } from '../../../api';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useAuthenticationStore } from '../../../stores';
 
 const init_questions : string[] = ["어떤걸 만드실 건가요?"]
 
@@ -11,6 +12,10 @@ const GenerateDocument = () => {
   const [isQuestionEnd, setIsQuestionEnd] = useState<boolean>(false)
   const [isGen,setIsGen] = useState<boolean>(false);
   const {project_id} = useParams();
+  const { user, isLoading: authLoading } = useAuthenticationStore();
+  const memberId = user?.id || 0;
+  const navigate = useNavigate();
+
 
   const submitHandler = async (qna:string[])=>{
     let _new = allQnA;
@@ -28,15 +33,16 @@ const GenerateDocument = () => {
     }
     setIsGen(true);
     const result = await api.post("/document/requirement/", {
-      owner_id : "backend1",
+      owner_id : `${memberId}`,
       project_id : project_id,
       requirement : _new.join("\n")
     })
     console.log(result);
+    navigate(`/documents/project/${project_id}`)
   }
 
   return (
-    <div className='w-[30rem] h-[30rem] overflow-y-scroll border-black border'>
+    <div className='w-[30rem] h-[30rem] overflow-y-scroll border-black rounded-md shadow-lg m-auto bg-white'>
       {
         isGen==false&&(<DocumentQuestion questions={questions} setQnA={submitHandler}/>)
       }
