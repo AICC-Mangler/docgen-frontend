@@ -15,9 +15,12 @@ import { useSidebarStore } from './stores/useSidebarStore';
 import RequirementDocumentViewer from './components/pages/document/requirementDocumentViewer';
 import DocumentRequest from './components/pages/document/documentRequest';
 import GenerateDocument from './components/pages/document/GenerateDocument';
-import DocumentList from './components/pages/document/documentList';
-import FunctionalDocumentViewer from './components/pages/document/FunctionalDocumentViewer';
-import PolicyDocumentViewer from './components/pages/document/PolicyDocumentViewer';
+import SignUpPage from './components/pages/Authentication/SignUpPage';
+import LoginPage from './components/pages/Authentication/LoginPage';
+import MyPage from './components/pages/MyPage';
+import IdFindPage from './components/pages/Authentication/IdFindPage';
+import PasswordFindPage from './components/pages/Authentication/PasswordFindPage';
+import IntroPage from './components/pages/IntroPage';
 
 function App() {
   const { isOpen, toggle } = useSidebarStore();
@@ -33,10 +36,13 @@ function App() {
         <div className={`flex-1 flex flex-col transition-all duration-300`}>
           <Header onMenuToggle={toggle} sidebarOpen={isOpen} />
           <main className="flex-1 p-6 bg-gray-50">
-            <div className="max-w-4xl mx-auto">
+            <div className="max-w-6xl mx-auto">
               <Routes>
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/intro" element={<IntroPage />} />
+                <Route path="/id-find" element={<IdFindPage />} />
+                <Route path="/password-find" element={<PasswordFindPage />} />
                 <Route path="/documents" element={<Documents />} />
                 <Route path="/notices" element={<Notices />} />
                 <Route path="/projects" element={<Project />} />
@@ -48,29 +54,17 @@ function App() {
                 />
                 <Route path="/member-test" element={<MemberTest />} />
                 <Route
-                  path="/prd-viewer/:document_id"
-                  element={<RequirementDocumentViewer/>}
+                  path="/prd-viewer-test/:document_id"
+                  element={<RequirementDocumentViewer />}
                 />
-                <Route
-                  path="/fsd-viewer/:document_id"
-                  element={<FunctionalDocumentViewer/>}
-                />
-                <Route
-                  path="/spd-viewer/:document_id"
-                  element={<PolicyDocumentViewer/>}
-                />
-                <Route
-                  path="/request-prd"
-                  element={<DocumentRequest />}
-                />
+                <Route path="/request-prd" element={<DocumentRequest />} />
                 <Route
                   path="/generate-document/:project_id"
                   element={<GenerateDocument />}
                 />
-                <Route
-                  path="/documentList/:project_id"
-                  element={<DocumentList />}
-                />
+                <Route path="/signup" element={<SignUpPage />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/mypage" element={<MyPage />} />
               </Routes>
             </div>
           </main>
