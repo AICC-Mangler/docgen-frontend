@@ -21,6 +21,10 @@ import MyPage from './components/pages/MyPage';
 import IdFindPage from './components/pages/Authentication/IdFindPage';
 import PasswordFindPage from './components/pages/Authentication/PasswordFindPage';
 import IntroPage from './components/pages/IntroPage';
+import DocumentPage from './components/pages/document/page';
+import DocumentList from './components/pages/document/documentList';
+import FunctionalDocumentViewer from './components/pages/document/FunctionalDocumentViewer';
+import PolicyDocumentViewer from './components/pages/document/PolicyDocumentViewer';
 
 function App() {
   const { isOpen, toggle } = useSidebarStore();
@@ -43,7 +47,27 @@ function App() {
                 <Route path="/intro" element={<IntroPage />} />
                 <Route path="/id-find" element={<IdFindPage />} />
                 <Route path="/password-find" element={<PasswordFindPage />} />
-                <Route path="/documents" element={<Documents />} />
+                <Route path="/documents" element={<DocumentPage />} />
+                <Route
+                  path="/documents/project/:project_id"
+                  element={<DocumentList />}
+                />
+                <Route
+                  path="/documents/generate/:project_id"
+                  element={<GenerateDocument />}
+                />
+                <Route
+                  path="/documents/prd_viewer/:document_id"
+                  element={<RequirementDocumentViewer />}
+                />
+                <Route
+                  path="/documents/fsd_viewer/:document_id"
+                  element={<FunctionalDocumentViewer />}
+                />
+                <Route
+                  path="/documents/spd_viewer/:document_id"
+                  element={<PolicyDocumentViewer />}
+                />
                 <Route path="/notices" element={<Notices />} />
                 <Route path="/notices/:id" element={<NoticeDetail />} />
                 <Route path="/projects" element={<Project />} />
