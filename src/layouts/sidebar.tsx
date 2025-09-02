@@ -156,6 +156,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle }) => {
     // 프로젝트 관련 경로 처리
     if (currentPath.startsWith('/projects/')) return 'project';
 
+    if (currentPath.startsWith('/notices/')) return 'notices';
+
     return menuItems.find((item) => item.path === currentPath)?.id || 'intro';
   };
 

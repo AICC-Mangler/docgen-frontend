@@ -5,7 +5,8 @@ import Footer from './layouts/footer';
 import Sidebar from './layouts/sidebar';
 import Dashboard from './components/pages/dashboard';
 import Documents from './components/pages/document';
-import Notices from './components/pages/notice';
+import Notices from './components/pages/Notice/page';
+import NoticeDetail from './components/pages/Notice/NoticeDetail';
 import Project from './components/pages/project/page';
 import ProjectDetail from './components/pages/project/projectDetail';
 import Timeline from './components/pages/timeline/page';
@@ -44,6 +45,7 @@ function App() {
                 <Route path="/password-find" element={<PasswordFindPage />} />
                 <Route path="/documents" element={<Documents />} />
                 <Route path="/notices" element={<Notices />} />
+                <Route path="/notices/:id" element={<NoticeDetail />} />
                 <Route path="/projects" element={<Project />} />
                 <Route path="/projects/:id" element={<ProjectDetail />} />
                 <Route path="/timelines" element={<Timeline />} />
