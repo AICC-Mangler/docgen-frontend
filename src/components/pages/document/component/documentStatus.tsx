@@ -1,4 +1,3 @@
-import React from 'react';
 type document_info = {
   id: string;
   project_id: string;

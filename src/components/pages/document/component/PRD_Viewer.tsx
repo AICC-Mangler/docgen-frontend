@@ -95,7 +95,7 @@ const PRD_Viewer: React.FC<PRD_Viewer_Data> = ({
           ]}
           filters={true}
           rowHeights={40}
-          cells={(row, col) => {
+          cells={(_row, col) => {
             const cellProperties: Handsontable.CellMeta = {};
             if (col < 3) {
               cellProperties.className = 'htCenter htMiddle font-bold';

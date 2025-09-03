@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import DocumentQuestion from './component/documentQuestion';
 import { api } from '../../../api';
 import { useNavigate, useParams } from 'react-router-dom';
