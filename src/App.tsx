@@ -25,7 +25,6 @@ import DocumentList from './components/pages/document/documentList';
 import FunctionalDocumentViewer from './components/pages/document/FunctionalDocumentViewer';
 import PolicyDocumentViewer from './components/pages/document/PolicyDocumentViewer';
 
-
 function App() {
   const { isOpen, toggle } = useSidebarStore();
 
@@ -42,7 +41,7 @@ function App() {
           <main className="flex-1 p-6 bg-gray-50">
             <div className="max-w-6xl mx-auto">
               <Routes>
-                <Route path="/" element={<Dashboard />} />
+                <Route path="/" element={<IntroPage />} />
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/intro" element={<IntroPage />} />
                 <Route path="/id-find" element={<IdFindPage />} />

@@ -11,25 +11,32 @@ const Notice: React.FC = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedNotice, setSelectedNotice] = useState<any>(null);
+  // const [memberRole, setMemberRole] = useState('USER');
 
   const {
     notices,
     isLoading,
     error,
+    currentPage,
+    totalPages,
+    totalCount,
+    pageSize,
     fetchNoticesAll,
     createNotice,
     updateNotice,
     deleteNotice,
     clearError,
+    setCurrentPage,
   } = useNoticeStore();
 
   const { user } = useAuthenticationStore();
   const memberId = user?.id || 0;
+  const memberRole = user?.role || 'USER';
 
   useEffect(() => {
     const loadNotices = async () => {
       try {
-        await fetchNoticesAll();
+        await fetchNoticesAll(currentPage, pageSize);
       } catch (error) {
         console.error('공지사항 로딩 실패:', error);
       }
@@ -41,7 +48,7 @@ const Notice: React.FC = () => {
     return () => {
       clearError();
     };
-  }, [fetchNoticesAll, clearError]);
+  }, [fetchNoticesAll, clearError, currentPage, pageSize]);
 
   const openEditModal = (notice: any) => {
     setSelectedNotice(notice);
@@ -65,7 +72,7 @@ const Notice: React.FC = () => {
         member_id: memberId,
       });
       // 공지사항 생성 성공 후 목록 새로고침
-      await fetchNoticesAll();
+      await fetchNoticesAll(currentPage, pageSize);
       // 모달 닫기
       setIsCreateModalOpen(false);
     } catch (error) {
@@ -84,7 +91,7 @@ const Notice: React.FC = () => {
         post_date: data.post_date,
       });
       // 공지사항 수정 성공 후 목록 새로고침
-      await fetchNoticesAll();
+      await fetchNoticesAll(currentPage, pageSize);
       // 모달 닫기
       setIsEditModalOpen(false);
       setSelectedNotice(null);
@@ -101,13 +108,37 @@ const Notice: React.FC = () => {
     try {
       await deleteNotice(selectedNotice.id);
       // 공지사항 삭제 성공 후 목록 새로고침
-      await fetchNoticesAll();
+      await fetchNoticesAll(currentPage, pageSize);
       // 모달 닫기
       setIsDeleteModalOpen(false);
       setSelectedNotice(null);
     } catch (error) {
       console.error('공지사항 삭제 실패:', error);
     }
+  };
+
+  // 페이지네이션 핸들러
+  const handlePageChange = async (page: number) => {
+    if (page < 1 || page > totalPages) return;
+    setCurrentPage(page);
+    await fetchNoticesAll(page, pageSize);
+  };
+
+  // 페이지 번호 배열 생성
+  const getPageNumbers = () => {
+    const pages = [];
+    const maxVisiblePages = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+    if (endPage - startPage + 1 < maxVisiblePages) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+    return pages;
   };
 
   // 로딩 상태 처리
@@ -150,12 +181,14 @@ const Notice: React.FC = () => {
               중요한 소식과 업데이트를 확인하세요.
             </p>
           </div>
-          <button
-            onClick={() => setIsCreateModalOpen(true)}
-            className="px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-medium rounded-xl hover:from-green-700 hover:to-emerald-700 transition-all duration-200 shadow-md hover:shadow-lg"
-          >
-            새 공지 작성
-          </button>
+          {memberRole !== 'USER' && (
+            <button
+              onClick={() => setIsCreateModalOpen(true)}
+              className="px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-medium rounded-xl hover:from-green-700 hover:to-emerald-700 transition-all duration-200 shadow-md hover:shadow-lg"
+            >
+              새 공지 작성
+            </button>
+          )}
         </div>
 
         {/* 공지사항 목록 */}
@@ -208,27 +241,29 @@ const Notice: React.FC = () => {
                         </span>
                       </div>
                     </div>
-                    <div className="flex space-x-2 ml-4">
-                      {/* 액션 아이콘들 */}
-                      <div className="flex-shrink-0 flex flex-col gap-2 ml-4 mt-2">
-                        <button
-                          className="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-lg flex items-center justify-center transition-colors duration-200"
-                          onClick={() => openEditModal(notice)}
-                          title="수정"
-                        >
-                          <span className="text-gray-600 text-sm font-bold">
-                            ✏️
-                          </span>
-                        </button>
-                        <button
-                          className="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-lg flex items-center justify-center transition-colors duration-200"
-                          onClick={() => openDeleteModal(notice)}
-                          title="삭제"
-                        >
-                          <span className="text-gray-600 text-sm">🗑️</span>
-                        </button>
+                    {memberRole !== 'USER' && (
+                      <div className="flex space-x-2 ml-4">
+                        {/* 액션 아이콘들 */}
+                        <div className="flex-shrink-0 flex flex-col gap-2 ml-4 mt-2">
+                          <button
+                            className="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-lg flex items-center justify-center transition-colors duration-200"
+                            onClick={() => openEditModal(notice)}
+                            title="수정"
+                          >
+                            <span className="text-gray-600 text-sm font-bold">
+                              ✏️
+                            </span>
+                          </button>
+                          <button
+                            className="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-lg flex items-center justify-center transition-colors duration-200"
+                            onClick={() => openDeleteModal(notice)}
+                            title="삭제"
+                          >
+                            <span className="text-gray-600 text-sm">🗑️</span>
+                          </button>
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </div>
                 </div>
               ))
@@ -236,24 +271,57 @@ const Notice: React.FC = () => {
         </div>
 
         {/* 페이지네이션 */}
-        <div className="flex justify-center mt-8">
-          <nav className="flex space-x-2">
-            <button className="px-3 py-2 text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200">
-              이전
-            </button>
-            <button className="px-3 py-2 text-white bg-green-600 border border-green-600 rounded-lg">
-              1
-            </button>
-            <button className="px-3 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200">
-              2
-            </button>
-            <button className="px-3 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200">
-              3
-            </button>
-            <button className="px-3 py-2 text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200">
-              다음
-            </button>
-          </nav>
+        {totalPages > 1 && (
+          <div className="flex justify-center mt-8">
+            <nav className="flex space-x-2">
+              {/* 이전 버튼 */}
+              <button
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                className={`px-3 py-2 rounded-lg transition-colors duration-200 ${
+                  currentPage === 1
+                    ? 'text-gray-400 bg-gray-100 border border-gray-200 cursor-not-allowed'
+                    : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
+                }`}
+              >
+                이전
+              </button>
+
+              {/* 페이지 번호들 */}
+              {getPageNumbers().map((pageNum) => (
+                <button
+                  key={pageNum}
+                  onClick={() => handlePageChange(pageNum)}
+                  className={`px-3 py-2 rounded-lg transition-colors duration-200 ${
+                    pageNum === currentPage
+                      ? 'text-white bg-green-600 border border-green-600'
+                      : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
+                  }`}
+                >
+                  {pageNum}
+                </button>
+              ))}
+
+              {/* 다음 버튼 */}
+              <button
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className={`px-3 py-2 rounded-lg transition-colors duration-200 ${
+                  currentPage === totalPages
+                    ? 'text-gray-400 bg-gray-100 border border-gray-200 cursor-not-allowed'
+                    : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
+                }`}
+              >
+                다음
+              </button>
+            </nav>
+          </div>
+        )}
+
+        {/* 페이지 정보 표시 */}
+        <div className="flex justify-center mt-4 text-sm text-gray-500">
+          총 {totalCount}개의 공지사항 중 {(currentPage - 1) * pageSize + 1}-
+          {Math.min(currentPage * pageSize, totalCount)}개 표시
         </div>
       </div>
 
@@ -332,6 +400,11 @@ const Notice: React.FC = () => {
           </div>
         </div>
       </Modal>
+      {/* 권한 테스트 버튼 */}
+      {/* <div>
+        <button onClick={() => setmemRole('ADMIN')}>A</button>
+        <button onClick={() => setmemRole('USER')}>U</button>
+      </div> */}
     </div>
   );
 };
