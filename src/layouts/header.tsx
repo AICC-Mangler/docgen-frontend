@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuthenticationStore } from '../stores/useAuthenticationStore';
 interface HeaderProps {
   onMenuToggle?: () => void;
@@ -11,10 +11,10 @@ const Header: React.FC<HeaderProps> = ({
   sidebarOpen = true,
 }) => {
   const { isAuthenticated, signout } = useAuthenticationStore();
-
+  const navigate = useNavigate();
   const handleLogout = async () => {
     await signout();
-    // 로그아웃 후 로그인 페이지로 리다이렉트 등의 로직 추가
+    navigate('/');
   };
 
   return (

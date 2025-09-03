@@ -13,6 +13,9 @@ interface ApiResponse<T> {
   data: T;
   message: string;
   total?: number;
+  page?: number;
+  limit?: number;
+  totalPages?: number;
 }
 
 // Notice 타입 (백엔드와 일치)
@@ -51,13 +54,20 @@ interface NoticeState {
   isLoading: boolean;
   error: string | null;
 
+  // 페이지네이션 상태
+  currentPage: number;
+  totalPages: number;
+  totalCount: number;
+  pageSize: number;
+
   // 액션
-  fetchNoticesAll: () => Promise<void>;
+  fetchNoticesAll: (page?: number, limit?: number) => Promise<void>;
   fetchNoticeById: (id: number) => Promise<void>;
   createNotice: (noticeData: CreateNoticeDto) => Promise<void>;
   updateNotice: (id: number, noticeData: UpdateNoticeDto) => Promise<void>;
   deleteNotice: (id: number) => Promise<void>;
   setCurrentNotice: (notice: Notice | null) => void;
+  setCurrentPage: (page: number) => void;
   clearError: () => void;
   reset: () => void;
 }
@@ -67,6 +77,10 @@ const initialState = {
   currentNotice: null,
   isLoading: false,
   error: null,
+  currentPage: 1,
+  totalPages: 1,
+  totalCount: 0,
+  pageSize: 10,
 };
 
 export const useNoticeStore = create<NoticeState>()(
@@ -74,17 +88,20 @@ export const useNoticeStore = create<NoticeState>()(
     (set) => ({
       ...initialState,
 
-      // 공지사항 목록 조회
-      fetchNoticesAll: async () => {
+      // 공지사항 목록 조회 (페이지네이션)
+      fetchNoticesAll: async (page: number = 1, limit: number = 10) => {
         set({ isLoading: true, error: null });
         try {
-          const response = await fetch(`${API_BASE_URL}/notices`, {
-            mode: 'cors',
-            credentials: 'include',
-            headers: {
-              'Content-Type': 'application/json',
+          const response = await fetch(
+            `${API_BASE_URL}/notices?page=${page}&limit=${limit}`,
+            {
+              mode: 'cors',
+              credentials: 'include',
+              headers: {
+                'Content-Type': 'application/json',
+              },
             },
-          });
+          );
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
           }
@@ -94,7 +111,14 @@ export const useNoticeStore = create<NoticeState>()(
             const validNotices = Array.isArray(result.data)
               ? result.data.filter((notice) => notice && notice.id)
               : [];
-            set({ notices: validNotices, isLoading: false });
+            set({
+              notices: validNotices,
+              isLoading: false,
+              currentPage: result.page || page,
+              totalPages: result.totalPages || 1,
+              totalCount: result.total || 0,
+              pageSize: result.limit || limit,
+            });
           } else {
             throw new Error(result.message);
           }
@@ -243,6 +267,11 @@ export const useNoticeStore = create<NoticeState>()(
       // 현재 공지사항 설정
       setCurrentNotice: (notice: Notice | null) => {
         set({ currentNotice: notice });
+      },
+
+      // 현재 페이지 설정
+      setCurrentPage: (page: number) => {
+        set({ currentPage: page });
       },
 
       // 에러 초기화
