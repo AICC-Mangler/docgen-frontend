@@ -41,7 +41,10 @@ const GenerateDocument = () => {
   };
 
   return (
-    <div className="w-[30rem] h-[30rem] overflow-y-scroll border-black rounded-md shadow-lg m-auto bg-white">
+    <div className="m-auto w-[50rem] p-8 overflow-y-auto bg-white rounded-2xl shadow-sm border border-green-200/50">
+      <div>
+        <h1 className="text-3xl font-bold text-gray-800 mb-2">요구사항 정의서 생성</h1>
+      </div>
       {isGen == false && (
         <DocumentQuestion questions={questions} setQnA={submitHandler} />
       )}
