@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../../../../api';
 import DocumentListItem from './DocumentListItem';
 import { useAuthenticationStore } from '../../../../stores';
