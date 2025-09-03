@@ -197,7 +197,7 @@ const NoticeDetail: React.FC = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
         <div className="space-y-6">
           <div className="bg-white rounded-2xl shadow-sm border border-green-200/50 p-6">
             <h3 className="text-xl font-semibold text-gray-800 mb-4">
