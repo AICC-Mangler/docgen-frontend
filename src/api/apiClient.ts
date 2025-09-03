@@ -9,7 +9,9 @@ import type { ApiError } from '../types/api';
 
 // API 기본 설정
 export const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || 'http://localhost:3100';
+  import.meta.env.VITE_BACKEND_DEV_URL ||
+  import.meta.env.VITE_BACKEND_LOCAL_URL ||
+  'http://localhost:3100';
 const API_TIMEOUT = 30000; // 30초
 
 // Axios 인스턴스 생성
