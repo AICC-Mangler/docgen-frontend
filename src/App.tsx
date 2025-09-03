@@ -24,7 +24,7 @@ import DocumentPage from './components/pages/document/page';
 import DocumentList from './components/pages/document/documentList';
 import FunctionalDocumentViewer from './components/pages/document/FunctionalDocumentViewer';
 import PolicyDocumentViewer from './components/pages/document/PolicyDocumentViewer';
-import 'handsontable/dist/handsontable.full.min.css';
+
 
 function App() {
   const { isOpen, toggle } = useSidebarStore();
