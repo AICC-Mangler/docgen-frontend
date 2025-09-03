@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { api } from '../../../api';
-import DocumentListItem from './component/DocumentListItem';
-import { useAuthenticationStore } from '../../../stores';
+import { api } from '../../../../api';
+import DocumentListItem from './DocumentListItem';
+import { useAuthenticationStore } from '../../../../stores';
 
 type document_info = {
   id: string;
@@ -38,8 +38,7 @@ const DOCUMENT_TYPES = [
   },
 ];
 
-const DocumentList = () => {
-  const { project_id } = useParams();
+const DocumentList = ({project_id}:{project_id:string|undefined}) => {
   const [documents, setDocuments] = useState<document_dict>();
   const navigate = useNavigate();
   const { user } = useAuthenticationStore();
@@ -96,11 +95,34 @@ const DocumentList = () => {
     policy_document: PolicyViewerHandler,
   };
 
+  const DOCUMENT_DELETE : document_viewer= {
+    requirement_document: async (id:string)=>{
+      await api.delete(`document/requirement/${id}`);
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
+    },
+    functional_document: async  (id:string)=>{
+      await api.delete(`document/functional/${id}`);
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
+    },
+    policy_document: async  (id:string)=>{ 
+      await api.delete(`document/policy/${id}`);
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
+    },
+  };
+
   const DOCUMENT_GEN_FUNC: document_generator = {
     requirement_document: (project_id: string) => {
       navigate(`/documents/generate/${project_id}`);
     },
     functional_document: (project_id: string) => {
+      if(documents===undefined||documents["requirement_document"] === undefined) return;
+      if(documents["requirement_document"].status != "finished") return;
       const result = api.post('document/functional', {
         project_id: project_id,
         owner_id: `${memberId}`,
@@ -111,6 +133,9 @@ const DocumentList = () => {
       }, 500);
     },
     policy_document: (project_id: string) => {
+      if(documents===undefined||documents["functional_document"] === undefined) return;
+      if(documents["functional_document"].status != "finished") return;
+
       const result = api.post('document/policy', {
         project_id: project_id,
         owner_id: `${memberId}`,
@@ -131,16 +156,7 @@ const DocumentList = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="bg-white rounded-2xl shadow-sm border border-green-200/50 p-8">
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">문서 목록</h1>
-          </div>
-        </div>
-
-        <div>
-          <div className="m-auto p-2 flex flex-col gap-2 w-full">
+    <div className="m-auto p-2 flex flex-col gap-2 w-full">
             {documents
               ? DOCUMENT_TYPES.map((doc, idx) => {
                   const docs = documents[doc.name];
@@ -149,9 +165,10 @@ const DocumentList = () => {
                       <DocumentListItem
                         key={idx}
                         display={doc.display}
-                        create_date={' '}
+                        create_date={'생성되지 않음'}
                         status={'none'}
                         onClick={get_Click_Handler('none', doc.name, 'no_id')}
+                        onDelete={()=>{}}
                       />
                     );
                   return (
@@ -165,14 +182,12 @@ const DocumentList = () => {
                         doc.name,
                         docs.id,
                       )}
+                      onDelete={(()=>DOCUMENT_DELETE[doc.name](docs.id))}
                     />
                   );
                 })
               : ''}
           </div>
-        </div>
-      </div>
-    </div>
   );
 };
 

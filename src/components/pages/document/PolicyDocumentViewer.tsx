@@ -1,6 +1,7 @@
 import 'handsontable/dist/handsontable.full.css';
 import { useParams } from 'react-router-dom';
-import SPD_Viewer from './component/SPD_Viewer';
+import DocumentViewer from './component/DocumentViewer';
+import type Handsontable from 'handsontable';
 
 const PolicyDocumentViewer: React.FC = () => {
   const { document_id } = useParams();
@@ -8,7 +9,25 @@ const PolicyDocumentViewer: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="bg-white rounded-2xl shadow-sm border border-green-200/50 p-8">
-        <SPD_Viewer document_id={document_id} />
+      <DocumentViewer 
+          display_name='정책 정의서'
+          document_id={document_id}
+          document_type="policy"
+          cell_settings={(_row, col) => {
+            const cellProperties: Handsontable.CellMeta = {};
+            if (col < 3) {
+              cellProperties.className = 'htCenter htMiddle font-bold';
+            }
+            if (col > 3 && col < 8) {
+              cellProperties.className = 'htCenter htMiddle font-bold';
+            }
+            if (col < 2) {
+              cellProperties.width = 70;
+            }
+
+            return cellProperties;
+          }}
+        />
       </div>
     </div>
   );
