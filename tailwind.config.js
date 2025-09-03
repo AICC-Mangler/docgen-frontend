@@ -5,4 +5,7 @@ export default {
     extend: {},
   },
   plugins: [],
+  safelist: [
+    /^ht-/  // Handsontable의 클래스 네임 접두사 유지
+  ]
 };
