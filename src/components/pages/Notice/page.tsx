@@ -11,7 +11,7 @@ const Notice: React.FC = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedNotice, setSelectedNotice] = useState<any>(null);
-  const [memRole, setmemRole] = useState('USER');
+  // const [memberRole, setMemberRole] = useState('USER');
 
   const {
     notices,
@@ -31,8 +31,7 @@ const Notice: React.FC = () => {
 
   const { user } = useAuthenticationStore();
   const memberId = user?.id || 0;
-  // const memberRole = user?.role || 'USER';
-  const memberRole = memRole || 'USER';
+  const memberRole = user?.role || 'USER';
 
   useEffect(() => {
     const loadNotices = async () => {
@@ -401,10 +400,11 @@ const Notice: React.FC = () => {
           </div>
         </div>
       </Modal>
-      <div>
+      {/* 권한 테스트 버튼 */}
+      {/* <div>
         <button onClick={() => setmemRole('ADMIN')}>A</button>
         <button onClick={() => setmemRole('USER')}>U</button>
-      </div>
+      </div> */}
     </div>
   );
 };
