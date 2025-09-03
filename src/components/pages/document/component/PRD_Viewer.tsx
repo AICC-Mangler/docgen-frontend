@@ -4,6 +4,8 @@ import Handsontable from 'handsontable';
 import * as XLSX from 'xlsx';
 import { api } from '../../../../api';
 import { API_BASE_URL } from '../../../../api/apiClient';
+import { registerAllModules } from 'handsontable/registry';
+registerAllModules()
 interface MergeCell {
   row: number;
   col: number;
