@@ -5,7 +5,6 @@ import * as XLSX from 'xlsx';
 import 'handsontable/dist/handsontable.full.css';
 import { api } from '../../../../api';
 import { API_BASE_URL } from '../../../../api/apiClient';
-import 'handsontable/dist/handsontable.full.min.css';
 interface MergeCell {
   row: number;
   col: number;
