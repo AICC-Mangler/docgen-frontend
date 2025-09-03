@@ -21,7 +21,7 @@ import IdFindPage from './components/pages/Authentication/IdFindPage';
 import PasswordFindPage from './components/pages/Authentication/PasswordFindPage';
 import IntroPage from './components/pages/IntroPage';
 import DocumentPage from './components/pages/document/page';
-import DocumentList from './components/pages/document/documentList';
+import DocumentListPage from './components/pages/document/documentListPage';
 import FunctionalDocumentViewer from './components/pages/document/FunctionalDocumentViewer';
 import PolicyDocumentViewer from './components/pages/document/PolicyDocumentViewer';
 
@@ -50,7 +50,7 @@ function App() {
                 <Route path="/documents" element={<DocumentPage />} />
                 <Route
                   path="/documents/project/:project_id"
-                  element={<DocumentList />}
+                  element={<DocumentListPage />}
                 />
                 <Route
                   path="/documents/generate/:project_id"

@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { HotTable } from '@handsontable/react';
 import Handsontable from 'handsontable';
 import * as XLSX from 'xlsx';
-import 'handsontable/dist/handsontable.full.css';
 import { api } from '../../../../api';
 import { API_BASE_URL } from '../../../../api/apiClient';
 import { registerAllModules } from 'handsontable/registry';
@@ -19,19 +18,25 @@ interface TableData {
   colHeader: string[];
 }
 
-interface SPD_Viewer_Data {
+interface DocumentViewer_Data {
+  display_name : string | undefined;
   document_id: string | undefined;
+  document_type: "requirement" | "functional" | "policy"
+  cell_settings : (row:number, col:number)=>Handsontable.CellMeta
 }
 
-const SPD_Viewer: React.FC<SPD_Viewer_Data> = ({
+const DocumentViewer: React.FC<DocumentViewer_Data> = ({
+  display_name,
   document_id,
-}: SPD_Viewer_Data) => {
+  document_type,
+  cell_settings
+}: DocumentViewer_Data) => {
   const [tableData, setTableData] = useState<TableData>({
     data: [],
     mergeCells: [],
     colHeader: [],
   });
-  const document_url = `/document/policy/file/${document_id}`;
+  const document_url = `/document/${document_type}/file/${document_id}`;
   useEffect(() => {
     const fetchExcel = async () => {
       const response = await api.get(document_url, {
@@ -70,14 +75,19 @@ const SPD_Viewer: React.FC<SPD_Viewer_Data> = ({
   };
 
   return (
-    <div>
-      <button
-        className="bg-green-600 text-white shadow-md"
-        onClick={download_btn}
-      >
-        download
-      </button>
-      <div className="overflow-y-scroll h-[600px]">
+    <div className='flex flex-col gap-3'>
+      <div>
+        <h1 className="text-3xl font-bold text-gray-800 mb-2">{display_name}</h1>
+      </div>
+      <div className='flex justify-end'>
+        <button
+          className="bg-green-600 text-white shadow-md"
+          onClick={download_btn}
+        >
+          download
+        </button>
+      </div>
+      <div className="overflow-y-scroll h-[600px] border border-black">
         <HotTable
           data={tableData.data.slice(1)}
           colHeaders={tableData.colHeader}
@@ -89,27 +99,8 @@ const SPD_Viewer: React.FC<SPD_Viewer_Data> = ({
           manualColumnResize={true}
           manualRowResize={true}
           readOnly={true} // 읽기 전용
-          dropdownMenu={[
-            'filter_by_condition',
-            'filter_action_bar',
-            'filter_by_value',
-          ]}
-          filters={true}
           rowHeights={40}
-          cells={(_row, col) => {
-            const cellProperties: Handsontable.CellMeta = {};
-            if (col < 3) {
-              cellProperties.className = 'htCenter htMiddle font-bold';
-            }
-            if (col > 3 && col < 8) {
-              cellProperties.className = 'htCenter htMiddle font-bold';
-            }
-            if (col < 2) {
-              cellProperties.width = 70;
-            }
-
-            return cellProperties;
-          }}
+          cells={cell_settings}
           className="htMiddle font-bold"
         />
       </div>
@@ -117,4 +108,4 @@ const SPD_Viewer: React.FC<SPD_Viewer_Data> = ({
   );
 };
 
-export default SPD_Viewer;
+export default DocumentViewer;
