@@ -14,7 +14,6 @@ const MyPage: React.FC = () => {
   const {
     openWithdrawModal,
     openMyPagePasswordModal,
-    isMyPagePasswordModalOpen,
     isPasswordVerified: modalPasswordVerified,
   } = useModalStore();
   const [activeSubSection, setActiveSubSection] =

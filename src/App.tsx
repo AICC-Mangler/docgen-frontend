@@ -4,7 +4,6 @@ import Header from './layouts/header';
 import Footer from './layouts/footer';
 import Sidebar from './layouts/sidebar';
 import Dashboard from './components/pages/dashboard';
-import Documents from './components/pages/document';
 import Notices from './components/pages/Notice/page';
 import NoticeDetail from './components/pages/Notice/NoticeDetail';
 import Project from './components/pages/project/page';

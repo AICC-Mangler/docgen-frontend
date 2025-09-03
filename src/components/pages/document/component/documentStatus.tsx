@@ -1,12 +1,12 @@
-import React from 'react'
+import React from 'react';
 type document_info = {
-  id: string,
-  project_id : string,
-  owner_id : string,
-  status: string,
-  create_date: string
-}
-const DocumentStatus = ({document}:{document:document_info}) => {
+  id: string;
+  project_id: string;
+  owner_id: string;
+  status: string;
+  create_date: string;
+};
+const DocumentStatus = ({ document }: { document: document_info }) => {
   return (
     <div>
       <div>id : {document.id}</div>
@@ -15,7 +15,7 @@ const DocumentStatus = ({document}:{document:document_info}) => {
       <div>status : {document.status}</div>
       <div>create_date : {document.create_date}</div>
     </div>
-  )
-}
+  );
+};
 
-export default DocumentStatus
+export default DocumentStatus;
