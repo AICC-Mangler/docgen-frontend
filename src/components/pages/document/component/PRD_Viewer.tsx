@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { HotTable } from '@handsontable/react';
 import Handsontable from 'handsontable';
 import * as XLSX from 'xlsx';
-import 'handsontable/dist/handsontable.full.css';
 import { api } from '../../../../api';
 import { API_BASE_URL } from '../../../../api/apiClient';
 interface MergeCell {
