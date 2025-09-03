@@ -133,6 +133,7 @@ export const useTimelineStore = create<TimelineState>()(
               ? error.message
               : '타임라인 생성에 실패했습니다.';
           set({ error: errorMessage, isLoading: false });
+          throw error;
         }
       },
 
