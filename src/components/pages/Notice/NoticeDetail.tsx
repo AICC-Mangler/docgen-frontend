@@ -214,21 +214,21 @@ const NoticeDetail: React.FC = () => {
             <h3 className="text-xl font-semibold text-gray-800 mb-4">
               공지사항 관리
             </h3>
-            <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-40">
               <button
-                className="w-full px-4 py-3 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors duration-200"
+                className="w-50 px-4 py-3 bg-slate-500 hover:bg-slate-600 text-white font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md"
                 onClick={() => openEditModal(currentNotice)}
                 title="수정"
               >
-                공지사항 수정
+                프로젝트 수정
               </button>
 
               <button
-                className="w-full px-4 py-3 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors duration-200"
+                className="w-50 px-4 py-3 bg-rose-500 hover:bg-rose-600 text-white font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md"
                 onClick={() => openDeleteModal(currentNotice)}
                 title="삭제"
               >
-                공지사항 삭제
+                프로젝트 삭제
               </button>
             </div>
           </div>

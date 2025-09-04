@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import Modal from '../../common/Modal';
 import ProjectCreateModal from './ProjectCreateModal';
+import ToastContainer from '../../common/ToastContainer';
 import '../../../styles/main.css';
 import { useProjectStore } from '../../../stores/useProjectStore';
 import { useTimelineStore } from '../../../stores/useTimelineStore';
+import { useToast } from '../../../hooks/useToast';
 import DocumentList from '../document/component/DocumentList';
 
 const ProjectDetail: React.FC = () => {
@@ -28,6 +30,8 @@ const ProjectDetail: React.FC = () => {
     isLoading: timelineLoading,
     fetchTimelinesByProjectId,
   } = useTimelineStore();
+
+  const { toasts, removeToast, showSuccess, showError } = useToast();
 
   useEffect(() => {
     const loadProject = async () => {
@@ -152,8 +156,12 @@ const ProjectDetail: React.FC = () => {
       // 프로젝트 수정 성공 후 모달 닫기
       setIsEditModalOpen(false);
       setSelectedProject(null);
+      // 성공 메시지 표시
+      showSuccess('프로젝트가 성공적으로 수정되었습니다.');
     } catch (error) {
       console.error('프로젝트 수정 실패:', error);
+      // 에러 메시지 표시
+      showError('프로젝트 수정에 실패했습니다. 다시 시도해주세요.');
     }
   };
 
@@ -166,228 +174,240 @@ const ProjectDetail: React.FC = () => {
       await deleteProject(selectedProject.id);
       setIsDeleteModalOpen(false);
       setSelectedProject(null);
+      // 성공 메시지 표시
+      showSuccess('프로젝트가 성공적으로 삭제되었습니다.');
       navigate('/projects');
     } catch (error) {
       console.error('프로젝트 삭제 실패:', error);
+      // 에러 메시지 표시
+      showError('프로젝트 삭제에 실패했습니다. 다시 시도해주세요.');
     }
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center">
-        <Link
-          to="/projects"
-          className="flex items-center text-gray-600 hover:text-gray-800 transition-colors duration-200"
-        >
-          <svg
-            className="w-5 h-5 mr-2"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+    <>
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
+      <div className="space-y-6">
+        <div className="flex items-center">
+          <Link
+            to="/projects"
+            className="flex items-center text-gray-600 hover:text-gray-800 transition-colors duration-200"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M15 19l-7-7 7-7"
-            />
-          </svg>
-          프로젝트 목록으로 돌아가기
-        </Link>
-      </div>
+            <svg
+              className="w-5 h-5 mr-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
+            프로젝트 목록으로 돌아가기
+          </Link>
+        </div>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-green-200/50 p-8">
-        <div className="flex justify-between items-start mb-6">
-          <div className="flex-1">
-            <h1 className="text-3xl font-bold text-gray-800 mb-3">
-              {currentProject.title}
-            </h1>
-            <p className="text-lg text-gray-600 mb-4">
-              {currentProject.introduction}
-            </p>
-            <div className="flex items-center space-x-3 mb-4">
-              <span
-                className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(currentProject.project_status)}`}
-              >
-                {getStatusText(currentProject.project_status)}
-              </span>
-            </div>
-            {currentProject.hashtags && currentProject.hashtags.length > 0 && (
-              <div className="flex flex-wrap gap-2 mb-4">
-                {currentProject.hashtags.map((tag: string, index: number) => (
-                  <span
-                    key={index}
-                    className="px-3 py-1 bg-green-100 text-green-800 text-sm rounded-full"
-                  >
-                    #{tag}
-                  </span>
-                ))}
+        <div className="bg-white rounded-2xl shadow-sm border border-green-200/50 p-8">
+          <div className="flex justify-between items-start mb-6">
+            <div className="flex-1">
+              <h1 className="text-3xl font-bold text-gray-800 mb-3">
+                {currentProject.title}
+              </h1>
+              <p className="text-lg text-gray-600 mb-4">
+                {currentProject.introduction}
+              </p>
+              <div className="flex items-center space-x-3 mb-4">
+                <span
+                  className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(currentProject.project_status)}`}
+                >
+                  {getStatusText(currentProject.project_status)}
+                </span>
               </div>
-            )}
-          </div>
-          <div className="text-right">
-            <div className="text-sm text-gray-500 mb-1">생성일</div>
-            <div className="text-lg font-medium text-gray-800">
-              {new Date(currentProject.created_date_time).toLocaleDateString()}
+              {currentProject.hashtags &&
+                currentProject.hashtags.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {currentProject.hashtags.map(
+                      (tag: string, index: number) => (
+                        <span
+                          key={index}
+                          className="px-3 py-1 bg-green-100 text-green-800 text-sm rounded-full"
+                        >
+                          #{tag}
+                        </span>
+                      ),
+                    )}
+                  </div>
+                )}
+            </div>
+            <div className="text-right">
+              <div className="text-sm text-gray-500 mb-1">생성일</div>
+              <div className="text-lg font-medium text-gray-800">
+                {new Date(
+                  currentProject.created_date_time,
+                ).toLocaleDateString()}
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
-        <div className="space-y-6">
-          <div className="bg-white rounded-2xl shadow-sm border border-green-200/50 p-6">
-            <h3 className="text-xl font-semibold text-gray-800 mb-4">문서</h3>
-            <DocumentList project_id={id}></DocumentList>
+        <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
+          <div className="space-y-6">
+            <div className="bg-white rounded-2xl shadow-sm border border-green-200/50 p-6">
+              <h3 className="text-xl font-semibold text-gray-800 mb-4">문서</h3>
+              <DocumentList project_id={id}></DocumentList>
+            </div>
           </div>
-        </div>
 
-        <div className="space-y-6">
-          <div className="bg-white rounded-2xl shadow-sm border border-green-200/50 p-6">
-            <h3 className="text-xl font-semibold text-gray-800 mb-4">
-              타임라인
-            </h3>
+          <div className="space-y-6">
+            <div className="bg-white rounded-2xl shadow-sm border border-green-200/50 p-6">
+              <h3 className="text-xl font-semibold text-gray-800 mb-4">
+                타임라인
+              </h3>
 
-            {/* 타임라인 목록 */}
-            <div className="space-y-4">
-              {timelineLoading ? (
-                <div className="flex justify-center items-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500"></div>
-                  <span className="ml-3 text-gray-600">
-                    타임라인 로딩 중...
-                  </span>
-                </div>
-              ) : timelines.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
-                  등록된 타임라인이 없습니다.
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {timelines.map((timeline: any) => (
-                    <div
-                      key={timeline.id}
-                      className="flex items-start p-4 bg-gray-50 rounded-lg border border-gray-200"
-                    >
-                      {/* 날짜 */}
-                      <div className="flex-shrink-0 w-20 text-sm font-medium text-gray-600 mr-4">
-                        {timeline.event_date}
+              {/* 타임라인 목록 */}
+              <div className="space-y-4">
+                {timelineLoading ? (
+                  <div className="flex justify-center items-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500"></div>
+                    <span className="ml-3 text-gray-600">
+                      타임라인 로딩 중...
+                    </span>
+                  </div>
+                ) : timelines.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    등록된 타임라인이 없습니다.
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {timelines.map((timeline: any) => (
+                      <div
+                        key={timeline.id}
+                        className="flex items-start p-4 bg-gray-50 rounded-lg border border-gray-200"
+                      >
+                        {/* 날짜 */}
+                        <div className="flex-shrink-0 w-20 text-sm font-medium text-gray-600 mr-4">
+                          {timeline.event_date}
+                        </div>
+
+                        {/* 콘텐츠 */}
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-gray-800 mb-1">
+                            {timeline.title}
+                          </h4>
+                          <p className="text-sm text-gray-600">
+                            {timeline.description}
+                          </p>
+                        </div>
                       </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
 
-                      {/* 콘텐츠 */}
-                      <div className="flex-1">
-                        <h4 className="font-semibold text-gray-800 mb-1">
-                          {timeline.title}
-                        </h4>
-                        <p className="text-sm text-gray-600">
-                          {timeline.description}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+          <div className="space-y-6">
+            <div className="bg-white rounded-2xl shadow-sm border border-green-200/50 p-6">
+              <h3 className="text-xl font-semibold text-gray-800 mb-4">
+                프로젝트 관리
+              </h3>
+              <div className="grid grid-cols-3 gap-60">
+                <button
+                  className="w-50 px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md"
+                  onClick={() =>
+                    navigate(`/timelines/projects/${currentProject.id}`)
+                  }
+                  title="타임라인 관리"
+                >
+                  타임라인 관리
+                </button>
+                <button
+                  className="w-50 px-4 py-3 bg-slate-500 hover:bg-slate-600 text-white font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md"
+                  onClick={() => openEditModal(currentProject)}
+                  title="수정"
+                >
+                  프로젝트 수정
+                </button>
+
+                <button
+                  className="w-50 px-4 py-3 bg-rose-500 hover:bg-rose-600 text-white font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md"
+                  onClick={() => openDeleteModal(currentProject)}
+                  title="삭제"
+                >
+                  프로젝트 삭제
+                </button>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="space-y-6">
-          <div className="bg-white rounded-2xl shadow-sm border border-green-200/50 p-6">
-            <h3 className="text-xl font-semibold text-gray-800 mb-4">
-              프로젝트 관리
-            </h3>
-            <div className="grid grid-cols-3 gap-60">
-              <button
-                className="w-50 px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md"
-                onClick={() =>
-                  navigate(`/timelines/projects/${currentProject.id}`)
-                }
-                title="타임라인 관리"
-              >
-                타임라인 관리
-              </button>
-              <button
-                className="w-50 px-4 py-3 bg-slate-500 hover:bg-slate-600 text-white font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md"
-                onClick={() => openEditModal(currentProject)}
-                title="수정"
-              >
-                프로젝트 수정
-              </button>
-
-              <button
-                className="w-50 px-4 py-3 bg-rose-500 hover:bg-rose-600 text-white font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md"
-                onClick={() => openDeleteModal(currentProject)}
-                title="삭제"
-              >
-                프로젝트 삭제
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* 프로젝트 수정 모달 */}
-      <Modal
-        isOpen={isEditModalOpen}
-        onClose={() => {
-          setIsEditModalOpen(false);
-          setSelectedProject(null);
-        }}
-        title="프로젝트 수정"
-        size="lg"
-      >
-        <ProjectCreateModal
+        {/* 프로젝트 수정 모달 */}
+        <Modal
+          isOpen={isEditModalOpen}
           onClose={() => {
             setIsEditModalOpen(false);
             setSelectedProject(null);
           }}
-          onSubmit={handleProjectEdit}
-          isEditMode={true}
-          initialData={selectedProject}
-        />
-      </Modal>
+          title="프로젝트 수정"
+          size="lg"
+        >
+          <ProjectCreateModal
+            onClose={() => {
+              setIsEditModalOpen(false);
+              setSelectedProject(null);
+            }}
+            onSubmit={handleProjectEdit}
+            isEditMode={true}
+            initialData={selectedProject}
+          />
+        </Modal>
 
-      {/* 프로젝트 삭제 확인 모달 */}
-      <Modal
-        isOpen={isDeleteModalOpen}
-        onClose={() => {
-          setIsDeleteModalOpen(false);
-          setSelectedProject(null);
-        }}
-        title="프로젝트 삭제"
-        size="md"
-      >
-        <div className="space-y-6">
-          <div className="text-center">
-            <p className="text-gray-700 mb-4">
-              <strong>"{selectedProject?.title}"</strong> 프로젝트를
-              삭제하시겠습니까?
-            </p>
-            <p className="text-sm text-gray-500">
-              이 작업은 되돌릴 수 없습니다.
-            </p>
+        {/* 프로젝트 삭제 확인 모달 */}
+        <Modal
+          isOpen={isDeleteModalOpen}
+          onClose={() => {
+            setIsDeleteModalOpen(false);
+            setSelectedProject(null);
+          }}
+          title="프로젝트 삭제"
+          size="md"
+        >
+          <div className="space-y-6">
+            <div className="text-center">
+              <p className="text-gray-700 mb-4">
+                <strong>"{selectedProject?.title}"</strong> 프로젝트를
+                삭제하시겠습니까?
+              </p>
+              <p className="text-sm text-gray-500">
+                이 작업은 되돌릴 수 없습니다.
+              </p>
+            </div>
+            <div className="flex justify-end space-x-3 pt-4">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsDeleteModalOpen(false);
+                  setSelectedProject(null);
+                }}
+                className="px-6 py-3 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors duration-200 font-medium"
+              >
+                취소
+              </button>
+              <button
+                type="button"
+                onClick={handleProjectDelete}
+                className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors duration-200 font-medium"
+              >
+                삭제
+              </button>
+            </div>
           </div>
-          <div className="flex justify-end space-x-3 pt-4">
-            <button
-              type="button"
-              onClick={() => {
-                setIsDeleteModalOpen(false);
-                setSelectedProject(null);
-              }}
-              className="px-6 py-3 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors duration-200 font-medium"
-            >
-              취소
-            </button>
-            <button
-              type="button"
-              onClick={handleProjectDelete}
-              className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors duration-200 font-medium"
-            >
-              삭제
-            </button>
-          </div>
-        </div>
-      </Modal>
-    </div>
+        </Modal>
+      </div>
+    </>
   );
 };
 

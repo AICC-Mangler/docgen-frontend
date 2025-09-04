@@ -40,10 +40,6 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
         <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center mr-4 flex-shrink-0">
           <img
             src={profileImage}
-            className="w-12 h-12 rounded-full object-cover"
-          />
-          <img
-            src={profileImage}
             alt={name}
             className="w-12 h-12 rounded-full object-cover"
           />
