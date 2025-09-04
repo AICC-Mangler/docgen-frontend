@@ -15,7 +15,7 @@ const DocumentListPage = () => {
   },[]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-black">
       <div className="bg-white rounded-2xl shadow-sm border border-green-200/50 p-8">
         <div className="flex justify-between items-center mb-6">
           <div>

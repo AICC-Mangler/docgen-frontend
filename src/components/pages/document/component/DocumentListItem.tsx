@@ -36,7 +36,7 @@ const DocumentListItem = ({
         {(<div>{status}</div>)}
         {status==="progress"&&(<div className="animate-spin rounded-full h-7 w-7 border-b-2 border-green-500"></div>)}
         <div className="px-2 w-[2rem] flex justify-center">
-          {(status==="finished"||status==="error")&&(<button onClick={deleteHandler}>🗑️</button>)}
+          {(status==="finished"||status==="error")&&(<button onClick={deleteHandler} className="bg-white border border-neutral-300">🗑️</button>)}
         </div>
       </div>
 

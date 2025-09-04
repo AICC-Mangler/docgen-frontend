@@ -162,7 +162,7 @@ const DocumentList = ({project_id}:{project_id:string|undefined}) => {
 
   
   return (
-    <div className="m-auto p-2 flex flex-col gap-2 w-full">
+    <div className="m-auto p-2 flex flex-col gap-2 w-full text-black">
     {documents
       ? DOCUMENT_TYPES.map((doc, idx) => {
           const docs = documents[doc.name];
