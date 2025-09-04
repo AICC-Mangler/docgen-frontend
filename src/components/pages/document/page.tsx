@@ -109,13 +109,6 @@ const Documents: React.FC = () => {
                 <p className="text-sm text-gray-600 mb-2">
                   {project.introduction}
                 </p>
-                <p className="text-xs text-gray-500">
-                  {project.project_status == 'COMPLETED'
-                    ? '완료'
-                    : project.project_status == 'IN_PROGRESS'
-                      ? '진행중'
-                      : '대기중'}
-                </p>
               </Link>
             ))
           )}

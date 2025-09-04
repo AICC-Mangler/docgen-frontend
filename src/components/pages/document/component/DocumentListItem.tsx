@@ -46,6 +46,13 @@ const DocumentListItem = ({
         <div className="text-sm font-light">{create_date}</div>
       </div>
       <div className="remote flex items-center gap-7 px-4">
+        
+        
+        <div className="px-2 w-[2rem] h-[5rem] flex justify-center items-center">
+          {(status==="finished"||status==="error")&&(<button onClick={deleteHandler} className="bg-white border border-neutral-300 h-full">🗑️</button>)}
+          {status==="progress"&&(<div className="animate-spin rounded-full h-7 w-7 border-b-2 border-green-500"></div>)}
+        </div>
+
         {
           (status==="none" && creatable === false)
           ?(<button className={`bg-gray-200 border-neutral-300 text-gray-800 w-[6rem] h-[5rem]`} onClick={onClick}>
@@ -57,11 +64,6 @@ const DocumentListItem = ({
               <div className="text-sm">{document_status_emoji[status].text}</div>
             </button>)
         }
-        
-        <div className="px-2 w-[2rem] h-[5rem] flex justify-center items-center">
-          {(status==="finished"||status==="error")&&(<button onClick={deleteHandler} className="bg-white border border-neutral-300 h-full">🗑️</button>)}
-          {status==="progress"&&(<div className="animate-spin rounded-full h-7 w-7 border-b-2 border-green-500"></div>)}
-        </div>
       </div>
 
       <Modal
