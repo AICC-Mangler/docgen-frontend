@@ -1,9 +1,9 @@
 import 'handsontable/dist/handsontable.full.css';
-import { useParams, useSearchParams} from 'react-router-dom';
+import {useSearchParams} from 'react-router-dom';
 import DocumentViewer from './component/DocumentViewer';
 import type Handsontable from 'handsontable';
 import { useProjectStore } from '../../../stores';
-import { useEffect, useState } from 'react';
+import { useEffect} from 'react';
 
 
 interface document_style {
@@ -77,12 +77,13 @@ const DocumentViewerPage: React.FC = () => {
   // const { document_id} = useParams();
   const document_id : string = searchParams.get("document_id")||"";
   const docuemnt_type : string = searchParams.get("document_type")||"";
-  const project_id : string = searchParams.get("project_id")||"";
   const doc_style = document_style_dict[docuemnt_type];
-
   const {currentProject,fetchProjectById} = useProjectStore();
+  const project_id : string = searchParams.get("project_id")||"";
   useEffect(()=>{
-    const loadProject = async()=>{await fetchProjectById(Number(project_id))}
+    if(!project_id) return;
+    const loadProject = async()=>{await fetchProjectById(parseInt(project_id,10))}
+    loadProject()
   },[]);
 
 

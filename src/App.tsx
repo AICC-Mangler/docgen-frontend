@@ -49,7 +49,7 @@ function App() {
                   element={<DocumentListPage />}
                 />
                 <Route
-                  path="/documents/generate/:project_id"
+                  path="/documents/generate"
                   element={<GenerateDocument />}
                 />
                 <Route

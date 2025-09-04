@@ -122,7 +122,7 @@ const DocumentList = ({project_id}:{project_id:string|undefined}) => {
 
   const DOCUMENT_GEN_FUNC: document_generator = {
     requirement_document: (project_id: string) => {
-      navigate(`/documents/generate/${project_id}`);
+      navigate(`/documents/generate?project_id=${project_id}`);
     },
     functional_document: (project_id: string) => {
       if(documents===undefined||documents["requirement_document"] === undefined) return;
