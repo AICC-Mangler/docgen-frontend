@@ -1,11 +1,7 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-
-// API 기본 URL 설정
-const API_BASE_URL =
-  import.meta.env.VITE_BACKEND_DEV_URL ||
-  import.meta.env.VITE_BACKEND_LOCAL_URL ||
-  'http://localhost:3100';
+import { api } from '../api/apiClient';
+import type { ApiError } from '../types/api';
 
 // 백엔드 API 응답 타입
 interface ApiResponse<T> {
@@ -78,21 +74,11 @@ export const useProjectStore = create<ProjectState>()(
         set({ isLoading: true, error: null });
         try {
           console.log('fetchProjectsByMemberId ongoing');
-          const response = await fetch(
-            `${API_BASE_URL}/projects/?id=${memberId}`,
-            {
-              mode: 'cors',
-              credentials: 'include',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-            },
+          const response = await api.get<ApiResponse<Project[]>>(
+            `/projects/?id=${memberId}`,
           );
-          if (!response.ok) {
-            console.log('fetchProjectsByMemberId fail');
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-          const result: ApiResponse<Project[]> = await response.json();
+          const result = response.data;
+
           if (result.success) {
             console.log('fetchProjectsByMemberId success');
             console.log('result.data = ' + result.data[0]);
@@ -102,10 +88,9 @@ export const useProjectStore = create<ProjectState>()(
             throw new Error(result.message);
           }
         } catch (error) {
+          const apiError = error as ApiError;
           const errorMessage =
-            error instanceof Error
-              ? error.message
-              : '프로젝트 목록 조회에 실패했습니다.';
+            apiError.message || '프로젝트 목록 조회에 실패했습니다.';
           console.log('errorMessage = ' + errorMessage);
           set({ error: errorMessage, isLoading: false });
         }
@@ -115,27 +100,20 @@ export const useProjectStore = create<ProjectState>()(
       fetchProjectById: async (id: number) => {
         set({ isLoading: true, error: null });
         try {
-          const response = await fetch(`${API_BASE_URL}/projects/${id}`, {
-            mode: 'cors',
-            credentials: 'include',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          });
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-          const result: ApiResponse<Project> = await response.json();
+          const response = await api.get<ApiResponse<Project>>(
+            `/projects/${id}`,
+          );
+          const result = response.data;
+
           if (result.success) {
             set({ currentProject: result.data, isLoading: false });
           } else {
             throw new Error(result.message);
           }
         } catch (error) {
+          const apiError = error as ApiError;
           const errorMessage =
-            error instanceof Error
-              ? error.message
-              : '프로젝트 조회에 실패했습니다.';
+            apiError.message || '프로젝트 조회에 실패했습니다.';
           set({ error: errorMessage, isLoading: false });
         }
       },
@@ -144,17 +122,12 @@ export const useProjectStore = create<ProjectState>()(
       createProject: async (projectData: CreateProjectDto) => {
         set({ isLoading: true, error: null });
         try {
-          const response = await fetch(`${API_BASE_URL}/projects`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(projectData),
-          });
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-          const result: ApiResponse<Project> = await response.json();
+          const response = await api.post<ApiResponse<Project>>(
+            '/projects',
+            projectData,
+          );
+          const result = response.data;
+
           if (result.success) {
             set((state) => ({
               projects: [...state.projects, result.data],
@@ -164,10 +137,9 @@ export const useProjectStore = create<ProjectState>()(
             throw new Error(result.message);
           }
         } catch (error) {
+          const apiError = error as ApiError;
           const errorMessage =
-            error instanceof Error
-              ? error.message
-              : '프로젝트 생성에 실패했습니다.';
+            apiError.message || '프로젝트 생성에 실패했습니다.';
           set({ error: errorMessage, isLoading: false });
           throw error;
         }
@@ -177,17 +149,12 @@ export const useProjectStore = create<ProjectState>()(
       updateProject: async (id: number, projectData: UpdateProjectDto) => {
         set({ isLoading: true, error: null });
         try {
-          const response = await fetch(`${API_BASE_URL}/projects/${id}`, {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(projectData),
-          });
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-          const result: ApiResponse<Project> = await response.json();
+          const response = await api.put<ApiResponse<Project>>(
+            `/projects/${id}`,
+            projectData,
+          );
+          const result = response.data;
+
           if (result.success) {
             set((state) => ({
               projects: state.projects.map((project) =>
@@ -200,10 +167,9 @@ export const useProjectStore = create<ProjectState>()(
             throw new Error(result.message);
           }
         } catch (error) {
+          const apiError = error as ApiError;
           const errorMessage =
-            error instanceof Error
-              ? error.message
-              : '프로젝트 수정에 실패했습니다.';
+            apiError.message || '프로젝트 수정에 실패했습니다.';
           set({ error: errorMessage, isLoading: false });
           throw error;
         }
@@ -213,17 +179,11 @@ export const useProjectStore = create<ProjectState>()(
       deleteProject: async (id: number) => {
         set({ isLoading: true, error: null });
         try {
-          const response = await fetch(`${API_BASE_URL}/projects/${id}`, {
-            method: 'DELETE',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          });
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-          const result: ApiResponse<{ success: boolean; message: string }> =
-            await response.json();
+          const response = await api.delete<
+            ApiResponse<{ success: boolean; message: string }>
+          >(`/projects/${id}`);
+          const result = response.data;
+
           if (result.success) {
             set((state) => ({
               projects: state.projects.filter((project) => project.id !== id),
@@ -235,10 +195,9 @@ export const useProjectStore = create<ProjectState>()(
             throw new Error(result.message);
           }
         } catch (error) {
+          const apiError = error as ApiError;
           const errorMessage =
-            error instanceof Error
-              ? error.message
-              : '프로젝트 삭제에 실패했습니다.';
+            apiError.message || '프로젝트 삭제에 실패했습니다.';
           set({ error: errorMessage, isLoading: false });
           throw error;
         }

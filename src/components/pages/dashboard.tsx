@@ -68,7 +68,7 @@ const Dashboard: React.FC = () => {
       try {
         setIsLoading(true);
         const response = await fetch(
-          `${API_BASE_URL}/projects/total/${user.id}`,
+          `${API_BASE_URL}/projects/count/${user.id}`,
           {
             mode: 'cors',
             credentials: 'include',
