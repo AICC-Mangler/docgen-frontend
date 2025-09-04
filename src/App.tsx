@@ -11,8 +11,6 @@ import ProjectDetail from './components/pages/project/projectDetail';
 import Timeline from './components/pages/timeline/page';
 import TimelineDetail from './components/pages/timeline/timeline';
 import { useSidebarStore } from './stores/useSidebarStore';
-import RequirementDocumentViewer from './components/pages/document/requirementDocumentViewer';
-import DocumentRequest from './components/pages/document/documentRequest';
 import GenerateDocument from './components/pages/document/GenerateDocument';
 import SignUpPage from './components/pages/Authentication/SignUpPage';
 import LoginPage from './components/pages/Authentication/LoginPage';
@@ -22,8 +20,7 @@ import PasswordFindPage from './components/pages/Authentication/PasswordFindPage
 import IntroPage from './components/pages/IntroPage';
 import DocumentPage from './components/pages/document/page';
 import DocumentListPage from './components/pages/document/documentListPage';
-import FunctionalDocumentViewer from './components/pages/document/FunctionalDocumentViewer';
-import PolicyDocumentViewer from './components/pages/document/PolicyDocumentViewer';
+import DocumentViewerPage from './components/pages/document/DocumentVIewerPage';
 
 function App() {
   const { isOpen, toggle } = useSidebarStore();
@@ -56,16 +53,8 @@ function App() {
                   element={<GenerateDocument />}
                 />
                 <Route
-                  path="/documents/prd_viewer/:document_id"
-                  element={<RequirementDocumentViewer />}
-                />
-                <Route
-                  path="/documents/fsd_viewer/:document_id"
-                  element={<FunctionalDocumentViewer />}
-                />
-                <Route
-                  path="/documents/spd_viewer/:document_id"
-                  element={<PolicyDocumentViewer />}
+                  path="/documents/viewer"
+                  element={<DocumentViewerPage />}
                 />
                 <Route path="/notices" element={<Notices />} />
                 <Route path="/notices/:id" element={<NoticeDetail />} />
@@ -76,11 +65,6 @@ function App() {
                   path="/timelines/projects/:id"
                   element={<TimelineDetail />}
                 />
-                <Route
-                  path="/prd-viewer-test/:document_id"
-                  element={<RequirementDocumentViewer />}
-                />
-                <Route path="/request-prd" element={<DocumentRequest />} />
                 <Route
                   path="/generate-document"
                   element={<GenerateDocument />}

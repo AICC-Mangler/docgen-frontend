@@ -80,14 +80,18 @@ const DocumentList = ({project_id}:{project_id:string|undefined}) => {
     return undefined;
   };
 
+  const redirect_viewer = (doc_type: string, document_id : string, project_id: string)=>{
+    navigate(`/documents/viewer?document_id=${document_id}&project_id=${project_id}&document_type=${doc_type}`);
+  }
+
   const requirementViewerHandler = (document_id: string) => {
-    navigate(`/documents/prd_viewer/${document_id}`);
+    redirect_viewer("requirement",document_id,project_id||" ")
   };
   const functionalViewerHandler = (document_id: string) => {
-    navigate(`/documents/fsd_viewer/${document_id}`);
+    redirect_viewer("functional",document_id,project_id||" ")
   };
   const PolicyViewerHandler = (document_id: string) => {
-    navigate(`/documents/spd_viewer/${document_id}`);
+    redirect_viewer("policy",document_id,project_id||" ")
   };
   const DOCUMENT_VIEWER: document_viewer = {
     requirement_document: requirementViewerHandler,
