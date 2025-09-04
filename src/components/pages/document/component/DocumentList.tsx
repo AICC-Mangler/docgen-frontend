@@ -80,14 +80,18 @@ const DocumentList = ({project_id}:{project_id:string|undefined}) => {
     return undefined;
   };
 
+  const redirect_viewer = (doc_type: string, document_id : string, project_id: string)=>{
+    navigate(`/documents/viewer?document_id=${document_id}&project_id=${project_id}&document_type=${doc_type}`);
+  }
+
   const requirementViewerHandler = (document_id: string) => {
-    navigate(`/documents/prd_viewer/${document_id}`);
+    redirect_viewer("requirement",document_id,project_id||" ")
   };
   const functionalViewerHandler = (document_id: string) => {
-    navigate(`/documents/fsd_viewer/${document_id}`);
+    redirect_viewer("functional",document_id,project_id||" ")
   };
   const PolicyViewerHandler = (document_id: string) => {
-    navigate(`/documents/spd_viewer/${document_id}`);
+    redirect_viewer("policy",document_id,project_id||" ")
   };
   const DOCUMENT_VIEWER: document_viewer = {
     requirement_document: requirementViewerHandler,
@@ -118,7 +122,7 @@ const DocumentList = ({project_id}:{project_id:string|undefined}) => {
 
   const DOCUMENT_GEN_FUNC: document_generator = {
     requirement_document: (project_id: string) => {
-      navigate(`/documents/generate/${project_id}`);
+      navigate(`/documents/generate?project_id=${project_id}`);
     },
     functional_document: (project_id: string) => {
       if(documents===undefined||documents["requirement_document"] === undefined) return;
@@ -147,6 +151,12 @@ const DocumentList = ({project_id}:{project_id:string|undefined}) => {
     },
   };
 
+  const DOCUMENT_CREATABLE : {[key:string]:boolean}= {
+    requirement_document: true,
+    functional_document: !((documents===undefined||documents["requirement_document"] === undefined)||documents["requirement_document"].status != "finished"),
+    policy_document:!((documents===undefined||documents["functional_document"] === undefined)||(documents["functional_document"].status != "finished"))
+  };
+
   const get_Click_Handler = (status: string, doc_type: string, id: string) => {
     if (status === 'error' || status === 'none')
       return () => DOCUMENT_GEN_FUNC[doc_type](project_id || '');
@@ -155,39 +165,45 @@ const DocumentList = ({project_id}:{project_id:string|undefined}) => {
     return () => {};
   };
 
+
+  
   return (
-    <div className="m-auto p-2 flex flex-col gap-2 w-full">
-            {documents
-              ? DOCUMENT_TYPES.map((doc, idx) => {
-                  const docs = documents[doc.name];
-                  if (docs === undefined)
-                    return (
-                      <DocumentListItem
-                        key={idx}
-                        display={doc.display}
-                        create_date={'생성되지 않음'}
-                        status={'none'}
-                        onClick={get_Click_Handler('none', doc.name, 'no_id')}
-                        onDelete={()=>{}}
-                      />
-                    );
-                  return (
-                    <DocumentListItem
-                      key={idx}
-                      display={doc.display}
-                      create_date={docs.create_date.substring(0, 10)}
-                      status={docs.status}
-                      onClick={get_Click_Handler(
-                        docs.status,
-                        doc.name,
-                        docs.id,
-                      )}
-                      onDelete={(()=>DOCUMENT_DELETE[doc.name](docs.id))}
-                    />
-                  );
-                })
-              : ''}
-          </div>
+    <div className="m-auto p-2 flex flex-col gap-2 w-full text-black">
+    {documents
+      ? DOCUMENT_TYPES.map((doc, idx) => {
+          const docs = documents[doc.name];
+          const creatable = DOCUMENT_CREATABLE[doc.name]
+
+          if (docs === undefined)
+            return (
+              <DocumentListItem
+                key={idx}
+                display={doc.display}
+                create_date={'생성되지 않음'}
+                status={'none'}
+                creatable={creatable}
+                onClick={get_Click_Handler('none', doc.name, 'no_id')}
+                onDelete={()=>{}}
+              />
+            );
+          return (
+            <DocumentListItem
+              key={idx}
+              display={doc.display}
+              create_date={docs.status==="progress"?"AI가 문서를 작성하고 있습니다.":docs.create_date.substring(0, 10)}
+              status={docs.status}
+              creatable={creatable}
+              onClick={get_Click_Handler(
+                docs.status,
+                doc.name,
+                docs.id,
+              )}
+              onDelete={(()=>DOCUMENT_DELETE[doc.name](docs.id))}
+            />
+          );
+        })
+      : ''}
+  </div>
   );
 };
 
