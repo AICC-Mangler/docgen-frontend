@@ -4,7 +4,7 @@ import '../../../styles/main.css';
 import { useProjectStore } from '../../../stores';
 import ProtectedRoute from '../../common/ProtectedRoute';
 import { useAuthenticationStore } from '../../../stores/useAuthenticationStore';
-const Timeline: React.FC = () => {
+const Documents: React.FC = () => {
   const { projects, isLoading, error, fetchProjectsByMemberId, clearError } =
     useProjectStore();
 
@@ -85,7 +85,7 @@ const Timeline: React.FC = () => {
       <div className="bg-white rounded-2xl shadow-sm border border-green-200/50 p-8">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">타임라인</h1>
+            <h1 className="text-3xl font-bold text-gray-800 mb-2">문서 목록</h1>
             <p className="text-gray-600">프로젝트를 선택해 주세요.</p>
           </div>
         </div>
@@ -100,7 +100,7 @@ const Timeline: React.FC = () => {
             projects.map((project) => (
               <Link
                 key={project.id}
-                to={`/timelines/projects/${project.id}`}
+                to={`/documents/project/${project.id}`}
                 className="flex-1 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer block transition-colors"
               >
                 <h3 className="text-lg font-semibold text-gray-800 mb-1">
@@ -125,10 +125,10 @@ const Timeline: React.FC = () => {
   );
 };
 
-const TimelinePage = () => (
+const DocumentPage = () => (
   <ProtectedRoute>
-    <Timeline />
+    <Documents />
   </ProtectedRoute>
 );
 
-export default TimelinePage;
+export default DocumentPage;

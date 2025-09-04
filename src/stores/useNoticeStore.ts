@@ -12,74 +12,88 @@ interface ApiResponse<T> {
   success: boolean;
   data: T;
   message: string;
+  total?: number;
+  page?: number;
+  limit?: number;
+  totalPages?: number;
 }
 
-// Project 타입 (백엔드와 일치)
-interface Project {
+// Notice 타입 (백엔드와 일치)
+interface Notice {
   id: number;
-  member_id: number;
   title: string;
-  introduction: string;
-  project_status: 'COMPLETED' | 'IN_PROGRESS' | 'PENDING';
+  content: string;
+  noticetype: 'NOMAL' | 'EVENT';
+  post_date: string;
+  deleted_date_time?: string;
   created_date_time: string;
-  updated_date_time: string;
-  hashtags?: string[];
+  updated_date_time?: string;
 }
 
-// Project 생성 DTO
-interface CreateProjectDto {
-  member_id: number;
+// Notice 생성 DTO
+interface CreateNoticeDto {
   title: string;
-  introduction: string;
-  project_status: 'COMPLETED' | 'IN_PROGRESS' | 'PENDING';
-  hashtags?: string[];
+  content: string;
+  noticetype: 'NOMAL' | 'EVENT';
+  post_date: string;
+  member_id: number;
 }
 
-// Project 수정 DTO
-interface UpdateProjectDto {
+// Notice 수정 DTO
+interface UpdateNoticeDto {
   title?: string;
-  introduction?: string;
-  project_status?: 'COMPLETED' | 'IN_PROGRESS' | 'PENDING';
-  hashtags?: string[];
+  content?: string;
+  noticetype?: 'NOMAL' | 'EVENT';
+  post_date?: string;
 }
 
-interface ProjectState {
+interface NoticeState {
   // 상태
-  projects: Project[];
-  currentProject: Project | null;
+  notices: Notice[];
+  currentNotice: Notice | null;
   isLoading: boolean;
   error: string | null;
 
+  // 페이지네이션 상태
+  currentPage: number;
+  totalPages: number;
+  totalCount: number;
+  pageSize: number;
+
   // 액션
-  fetchProjectsByMemberId: (memberId: number) => Promise<void>;
-  fetchProjectById: (id: number) => Promise<void>;
-  createProject: (projectData: CreateProjectDto) => Promise<void>;
-  updateProject: (id: number, projectData: UpdateProjectDto) => Promise<void>;
-  deleteProject: (id: number) => Promise<void>;
-  setCurrentProject: (project: Project | null) => void;
+  fetchNoticesAll: (page?: number, limit?: number) => Promise<void>;
+  fetchNoticeById: (id: number) => Promise<void>;
+  createNotice: (noticeData: CreateNoticeDto) => Promise<void>;
+  updateNotice: (id: number, noticeData: UpdateNoticeDto) => Promise<void>;
+  deleteNotice: (id: number) => Promise<void>;
+  setCurrentNotice: (notice: Notice | null) => void;
+  setCurrentPage: (page: number) => void;
   clearError: () => void;
   reset: () => void;
 }
 
 const initialState = {
-  projects: [],
-  currentProject: null,
+  notices: [],
+  currentNotice: null,
   isLoading: false,
   error: null,
+  currentPage: 1,
+  totalPages: 1,
+  totalCount: 0,
+  pageSize: 10,
 };
 
-export const useProjectStore = create<ProjectState>()(
+export const useNoticeStore = create<NoticeState>()(
   devtools(
     (set) => ({
       ...initialState,
 
-      // 프로젝트 목록 조회 (멤버별)
-      fetchProjectsByMemberId: async (memberId: number) => {
+      // 공지사항 목록 조회 (페이지네이션)
+      fetchNoticesAll: async (page: number = 1, limit: number = 10) => {
         set({ isLoading: true, error: null });
         try {
-          console.log('fetchProjectsByMemberId ongoing');
           const response = await fetch(
-            `${API_BASE_URL}/projects/?id=${memberId}`,
+            `${API_BASE_URL}/notices?page=${page}&limit=${limit}`,
             {
               mode: 'cors',
               credentials: 'include',
@@ -89,33 +103,39 @@ export const useProjectStore = create<ProjectState>()(
             },
           );
           if (!response.ok) {
-            console.log('fetchProjectsByMemberId fail');
             throw new Error(`HTTP error! status: ${response.status}`);
           }
-          const result: ApiResponse<Project[]> = await response.json();
+          const result: ApiResponse<Notice[]> = await response.json();
           if (result.success) {
-            console.log('fetchProjectsByMemberId success');
-            console.log('result.data = ' + result.data[0]);
-            set({ projects: result.data, isLoading: false });
+            // result.data가 배열인지 확인하고, 유효한 notice 객체만 필터링
+            const validNotices = Array.isArray(result.data)
+              ? result.data.filter((notice) => notice && notice.id)
+              : [];
+            set({
+              notices: validNotices,
+              isLoading: false,
+              currentPage: result.page || page,
+              totalPages: result.totalPages || 1,
+              totalCount: result.total || 0,
+              pageSize: result.limit || limit,
+            });
           } else {
-            console.log('fetchProjectsByMemberId fail2');
             throw new Error(result.message);
           }
         } catch (error) {
           const errorMessage =
             error instanceof Error
               ? error.message
-              : '프로젝트 목록 조회에 실패했습니다.';
-          console.log('errorMessage = ' + errorMessage);
+              : '공지사항 목록 조회에 실패했습니다.';
           set({ error: errorMessage, isLoading: false });
         }
       },
 
-      // 단일 프로젝트 조회
-      fetchProjectById: async (id: number) => {
+      // 단일 공지사항 조회
+      fetchNoticeById: async (id: number) => {
         set({ isLoading: true, error: null });
         try {
-          const response = await fetch(`${API_BASE_URL}/projects/${id}`, {
+          const response = await fetch(`${API_BASE_URL}/notices/${id}`, {
             mode: 'cors',
             credentials: 'include',
             headers: {
@@ -125,9 +145,9 @@ export const useProjectStore = create<ProjectState>()(
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
           }
-          const result: ApiResponse<Project> = await response.json();
+          const result: ApiResponse<Notice> = await response.json();
           if (result.success) {
-            set({ currentProject: result.data, isLoading: false });
+            set({ currentNotice: result.data, isLoading: false });
           } else {
             throw new Error(result.message);
           }
@@ -135,29 +155,29 @@ export const useProjectStore = create<ProjectState>()(
           const errorMessage =
             error instanceof Error
               ? error.message
-              : '프로젝트 조회에 실패했습니다.';
+              : '공지사항 조회에 실패했습니다.';
           set({ error: errorMessage, isLoading: false });
         }
       },
 
-      // 프로젝트 생성
-      createProject: async (projectData: CreateProjectDto) => {
+      // 공지사항 생성
+      createNotice: async (noticeData: CreateNoticeDto) => {
         set({ isLoading: true, error: null });
         try {
-          const response = await fetch(`${API_BASE_URL}/projects`, {
+          const response = await fetch(`${API_BASE_URL}/notices`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify(projectData),
+            body: JSON.stringify(noticeData),
           });
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
           }
-          const result: ApiResponse<Project> = await response.json();
+          const result: ApiResponse<Notice> = await response.json();
           if (result.success) {
             set((state) => ({
-              projects: [...state.projects, result.data],
+              notices: [...state.notices, result.data],
               isLoading: false,
             }));
           } else {
@@ -167,33 +187,33 @@ export const useProjectStore = create<ProjectState>()(
           const errorMessage =
             error instanceof Error
               ? error.message
-              : '프로젝트 생성에 실패했습니다.';
+              : '공지사항 생성에 실패했습니다.';
           set({ error: errorMessage, isLoading: false });
           throw error;
         }
       },
 
-      // 프로젝트 수정
-      updateProject: async (id: number, projectData: UpdateProjectDto) => {
+      // 공지사항 수정
+      updateNotice: async (id: number, noticeData: UpdateNoticeDto) => {
         set({ isLoading: true, error: null });
         try {
-          const response = await fetch(`${API_BASE_URL}/projects/${id}`, {
+          const response = await fetch(`${API_BASE_URL}/notices/${id}`, {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify(projectData),
+            body: JSON.stringify(noticeData),
           });
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
           }
-          const result: ApiResponse<Project> = await response.json();
+          const result: ApiResponse<Notice> = await response.json();
           if (result.success) {
             set((state) => ({
-              projects: state.projects.map((project) =>
-                project.id === id ? result.data : project,
+              notices: state.notices.map((notice) =>
+                notice.id === id ? result.data : notice,
               ),
-              currentProject: result.data,
+              currentNotice: result.data,
               isLoading: false,
             }));
           } else {
@@ -203,17 +223,17 @@ export const useProjectStore = create<ProjectState>()(
           const errorMessage =
             error instanceof Error
               ? error.message
-              : '프로젝트 수정에 실패했습니다.';
+              : '공지사항 수정에 실패했습니다.';
           set({ error: errorMessage, isLoading: false });
           throw error;
         }
       },
 
-      // 프로젝트 삭제
-      deleteProject: async (id: number) => {
+      // 공지사항 삭제
+      deleteNotice: async (id: number) => {
         set({ isLoading: true, error: null });
         try {
-          const response = await fetch(`${API_BASE_URL}/projects/${id}`, {
+          const response = await fetch(`${API_BASE_URL}/notices/${id}`, {
             method: 'DELETE',
             headers: {
               'Content-Type': 'application/json',
@@ -226,9 +246,9 @@ export const useProjectStore = create<ProjectState>()(
             await response.json();
           if (result.success) {
             set((state) => ({
-              projects: state.projects.filter((project) => project.id !== id),
-              currentProject:
-                state.currentProject?.id === id ? null : state.currentProject,
+              notices: state.notices.filter((notice) => notice.id !== id),
+              currentNotice:
+                state.currentNotice?.id === id ? null : state.currentNotice,
               isLoading: false,
             }));
           } else {
@@ -238,15 +258,20 @@ export const useProjectStore = create<ProjectState>()(
           const errorMessage =
             error instanceof Error
               ? error.message
-              : '프로젝트 삭제에 실패했습니다.';
+              : '공지사항 삭제에 실패했습니다.';
           set({ error: errorMessage, isLoading: false });
           throw error;
         }
       },
 
-      // 현재 프로젝트 설정
-      setCurrentProject: (project: Project | null) => {
-        set({ currentProject: project });
+      // 현재 공지사항 설정
+      setCurrentNotice: (notice: Notice | null) => {
+        set({ currentNotice: notice });
+      },
+
+      // 현재 페이지 설정
+      setCurrentPage: (page: number) => {
+        set({ currentPage: page });
       },
 
       // 에러 초기화
@@ -260,7 +285,7 @@ export const useProjectStore = create<ProjectState>()(
       },
     }),
     {
-      name: 'project-store',
+      name: 'notice-store',
     },
   ),
 );

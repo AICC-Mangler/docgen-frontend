@@ -16,15 +16,22 @@ const Footer: React.FC = () => {
                 <span className="text-white font-bold text-lg">D</span>
               </div>
               <span className="text-xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
-                Docgen
+                DocGen
               </span>
             </Link>
+<<<<<<< HEAD
             <p className="text-gray-600 text-sm leading-relaxed whitespace-nowrap">
               문서 관리 시스템으로 비즈니스 효율성을 극대화하세요.
               <p>안전하고 직관적인 플랫폼을 제공합니다.</p>
+=======
+            <p className="text-gray-600 text-sm leading-relaxed">
+              AI 기반 문서 생성 및 관리 시스템을 제공합니다. 안전하고 직관적인
+              플랫폼을 이용하세요.
+>>>>>>> main
             </p>
           </div>
 
+<<<<<<< HEAD
           <div className="flex space-x-12 col-start-4">
             {/* 빠른 링크 */}
             <div className="space-y-3">
@@ -73,6 +80,21 @@ const Footer: React.FC = () => {
                 <Link
                   to="/notices"
                   className="flex items-center space-x-2 text-gray-600 hover:text-green-700 transition-colors duration-200 group"
+=======
+          {/* 빠른 링크 */}
+          <div className="space-y-3">
+            <h3 className="text-lg font-semibold text-green-800">빠른 링크</h3>
+            <div className="space-y-2">
+              <Link
+                to="/notices"
+                className="flex items-center space-x-2 text-gray-600 hover:text-green-700 transition-colors duration-200 group"
+              >
+                <svg
+                  className="w-4 h-4 text-green-500 group-hover:text-green-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+>>>>>>> main
                 >
                   <svg
                     className="w-4 h-4 text-green-500 group-hover:text-green-600"
@@ -93,6 +115,7 @@ const Footer: React.FC = () => {
                   to="/dashboard"
                   className="flex items-center space-x-2 text-gray-600 hover:text-green-700 transition-colors duration-200 group"
                 >
+<<<<<<< HEAD
                   <svg
                     className="w-4 h-4 text-green-500 group-hover:text-green-600"
                     fill="none"
@@ -109,6 +132,55 @@ const Footer: React.FC = () => {
                   <span>대시보드</span>
                 </Link>
               </div>
+=======
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+                <span>대시보드</span>
+              </Link>
+              <Link
+                to="/documents"
+                className="flex items-center space-x-2 text-gray-600 hover:text-green-700 transition-colors duration-200 group"
+              >
+                <svg
+                  className="w-4 h-4 text-green-500 group-hover:text-green-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+                <span>문서 관리</span>
+              </Link>
+              <Link
+                to="/projects"
+                className="flex items-center space-x-2 text-gray-600 hover:text-green-700 transition-colors duration-200 group"
+              >
+                <svg
+                  className="w-4 h-4 text-green-500 group-hover:text-green-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+                <span>프로젝트</span>
+              </Link>
+>>>>>>> main
             </div>
 
             {/* 지원 */}
@@ -184,7 +256,7 @@ const Footer: React.FC = () => {
             <div className="text-center md:text-left">
               <p className="text-sm text-gray-600">
                 © 2025{' '}
-                <span className="font-semibold text-green-700">Docgen</span>.
+                <span className="font-semibold text-green-700">DocGen</span>.
                 All rights reserved.
               </p>
             </div>

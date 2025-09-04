@@ -54,7 +54,7 @@ const MembershipCancelModal: React.FC<MembershipCancelModalProps> = ({
 
           {/* 상단 로고 및 안내 문구 */}
           <div className="text-center mb-6">
-            <h2 className="text-2xl font-bold text-black mb-2">Docgen</h2>
+            <h2 className="text-2xl font-bold text-black mb-2">DocGen</h2>
             <div className="w-16 h-0.5 bg-red-500 mx-auto mb-4"></div>
             <p className="text-sm text-gray-700">
               멤버십 해지를 신청하기 전, 아래 내용을 꼭 확인해 주세요.

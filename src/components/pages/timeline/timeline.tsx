@@ -26,6 +26,27 @@ const TimelineDetail: React.FC = () => {
     deleteTimeline,
   } = useTimelineStore();
 
+  const projectIdNumber = id ? parseInt(id, 10) : null;
+
+  useEffect(() => {
+    if (!projectIdNumber) return;
+
+    const loadTimelines = async () => {
+      try {
+        await fetchTimelinesByProjectId(projectIdNumber);
+      } catch (error) {
+        console.error('프로젝트 로딩 실패:', error);
+      }
+    };
+
+    loadTimelines();
+
+    // 컴포넌트 언마운트 시 에러 초기화
+    return () => {
+      clearError();
+    };
+  }, [fetchTimelinesByProjectId, clearError, projectIdNumber]);
+
   // projectId가 없으면 에러 처리
   if (!id) {
     return (
@@ -44,27 +65,9 @@ const TimelineDetail: React.FC = () => {
     );
   }
 
-  const projectIdNumber = parseInt(id, 10);
-
-  useEffect(() => {
-    const loadTimelines = async () => {
-      try {
-        await fetchTimelinesByProjectId(projectIdNumber);
-        console.log('timelines = ' + timelines);
-      } catch (error) {
-        console.error('프로젝트 로딩 실패:', error);
-      }
-    };
-
-    loadTimelines();
-
-    // 컴포넌트 언마운트 시 에러 초기화
-    return () => {
-      clearError();
-    };
-  }, [fetchTimelinesByProjectId, clearError, projectIdNumber]);
-
   const handleTimelineSubmit = async (data: any) => {
+    if (!projectIdNumber) return;
+
     data.project_id = projectIdNumber;
     console.log('새 타임라인 생성:', data);
 
@@ -88,6 +91,8 @@ const TimelineDetail: React.FC = () => {
   };
 
   const handleTimelineEdit = async (data: any) => {
+    if (!projectIdNumber) return;
+
     console.log('타임라인 수정:', data);
 
     try {
@@ -107,7 +112,7 @@ const TimelineDetail: React.FC = () => {
   };
 
   const handleTimelineDelete = async () => {
-    if (!selectedTimeline) return;
+    if (!selectedTimeline || !projectIdNumber) return;
 
     console.log('타임라인 삭제:', selectedTimeline);
 

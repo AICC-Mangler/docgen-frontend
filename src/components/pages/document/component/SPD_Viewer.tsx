@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { HotTable } from '@handsontable/react';
 import Handsontable from 'handsontable';
 import * as XLSX from 'xlsx';
+import 'handsontable/dist/handsontable.full.css';
 import { api } from '../../../../api';
 import { API_BASE_URL } from '../../../../api/apiClient';
 import { registerAllModules } from 'handsontable/registry';
@@ -18,19 +19,19 @@ interface TableData {
   colHeader: string[];
 }
 
-interface PRD_Viewer_Data {
+interface SPD_Viewer_Data {
   document_id: string | undefined;
 }
 
-const PRD_Viewer: React.FC<PRD_Viewer_Data> = ({
+const SPD_Viewer: React.FC<SPD_Viewer_Data> = ({
   document_id,
-}: PRD_Viewer_Data) => {
+}: SPD_Viewer_Data) => {
   const [tableData, setTableData] = useState<TableData>({
     data: [],
     mergeCells: [],
     colHeader: [],
   });
-  const document_url = `/document/requirement/file/${document_id}`;
+  const document_url = `/document/policy/file/${document_id}`;
   useEffect(() => {
     const fetchExcel = async () => {
       const response = await api.get(document_url, {
@@ -100,6 +101,9 @@ const PRD_Viewer: React.FC<PRD_Viewer_Data> = ({
             if (col < 3) {
               cellProperties.className = 'htCenter htMiddle font-bold';
             }
+            if (col > 3 && col < 8) {
+              cellProperties.className = 'htCenter htMiddle font-bold';
+            }
             if (col < 2) {
               cellProperties.width = 70;
             }
@@ -113,4 +117,4 @@ const PRD_Viewer: React.FC<PRD_Viewer_Data> = ({
   );
 };
 
-export default PRD_Viewer;
+export default SPD_Viewer;

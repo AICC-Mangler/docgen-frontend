@@ -57,6 +57,12 @@ const LoginPage: React.FC = () => {
       }
     };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleLogin();
+    }
+  };
+
   const handleLogin = async () => {
     if (validateForm()) {
       try {
@@ -83,7 +89,7 @@ const LoginPage: React.FC = () => {
         {/* 헤더 */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">
-            <h1 className="text-3xl font-bold text-gray-800">Docgen</h1>
+            <h1 className="text-3xl font-bold text-gray-800">DocGen</h1>
           </div>
           <h2 className="text-lg font-semibold text-gray-800 mb-2">로그인</h2>
           <p className="text-sm text-gray-600">
@@ -117,6 +123,7 @@ const LoginPage: React.FC = () => {
                   placeholder="비밀번호를 입력해 주세요."
                   value={formData.password}
                   onChange={handleInputChange('password')}
+                  onKeyDown={handleKeyDown}
                   className="w-full px-4 py-3 pr-12 text-sm bg-white border border-black rounded-lg focus:border-green-500 text-gray-800 placeholder-gray-500"
                 />
                 <button

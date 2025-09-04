@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { HotTable } from '@handsontable/react';
 import Handsontable from 'handsontable';
 import * as XLSX from 'xlsx';
+import 'handsontable/dist/handsontable.full.css';
 import { api } from '../../../../api';
 import { API_BASE_URL } from '../../../../api/apiClient';
 import { registerAllModules } from 'handsontable/registry';
@@ -18,19 +19,19 @@ interface TableData {
   colHeader: string[];
 }
 
-interface PRD_Viewer_Data {
+interface FSD_Viewer_Data {
   document_id: string | undefined;
 }
 
-const PRD_Viewer: React.FC<PRD_Viewer_Data> = ({
+const FSD_Viewer: React.FC<FSD_Viewer_Data> = ({
   document_id,
-}: PRD_Viewer_Data) => {
+}: FSD_Viewer_Data) => {
   const [tableData, setTableData] = useState<TableData>({
     data: [],
     mergeCells: [],
     colHeader: [],
   });
-  const document_url = `/document/requirement/file/${document_id}`;
+  const document_url = `/document/functional/file/${document_id}`;
   useEffect(() => {
     const fetchExcel = async () => {
       const response = await api.get(document_url, {
@@ -113,4 +114,4 @@ const PRD_Viewer: React.FC<PRD_Viewer_Data> = ({
   );
 };
 
-export default PRD_Viewer;
+export default FSD_Viewer;

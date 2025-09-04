@@ -233,6 +233,7 @@ export const useMemberStore = create<MemberState>()(
         newPassword: string,
         newPasswordConfirm: string,
       ) => {
+        console.log(id);
         set({ isLoading: true, error: null });
         try {
           const accessToken = localStorage.getItem('accessToken');
