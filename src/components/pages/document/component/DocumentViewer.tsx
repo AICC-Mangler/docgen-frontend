@@ -76,10 +76,8 @@ const DocumentViewer: React.FC<DocumentViewer_Data> = ({
 
   return (
     <div className='flex flex-col gap-3'>
-      <div>
+      <div className='flex justify-between'>
         <h1 className="text-3xl font-bold text-gray-800 mb-2">{display_name}</h1>
-      </div>
-      <div className='flex justify-end'>
         <button
           className="bg-green-600 text-white shadow-md"
           onClick={download_btn}
