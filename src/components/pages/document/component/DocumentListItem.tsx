@@ -5,14 +5,27 @@ interface doc_list_item {
   display: string;
   create_date: string;
   status: string;
+  creatable : boolean,
   onClick: () => void;
   onDelete: ()=> void;
+}
+
+
+interface emoji_dict{
+  [key:string]:{emoji:string, text: string}
+} 
+const document_status_emoji : emoji_dict= {
+  "none" : {emoji : "✏️",text : "생성"},
+  "progress" : {emoji:"💬",text : "생성중"},
+  "finished" : {emoji:"📄", text:"뷰어"},
+  "error" : {emoji:"🚫", text:"오류"}
 }
 
 const DocumentListItem = ({
   display,
   create_date,
   status,
+  creatable,
   onClick,
   onDelete,
 }: doc_list_item) => {
@@ -28,15 +41,26 @@ const DocumentListItem = ({
     <div
       className="flex h-[7rem] justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
     >
-      <div onClick={onClick} className="w-full px-2">
+      <div className="w-full px-2">
         <div className="text-lg font-bold">{display}</div>
         <div className="text-sm font-light">{create_date}</div>
       </div>
       <div className="remote flex items-center gap-7 px-4">
-        {(<div>{status}</div>)}
-        {status==="progress"&&(<div className="animate-spin rounded-full h-7 w-7 border-b-2 border-green-500"></div>)}
-        <div className="px-2 w-[2rem] flex justify-center">
-          {(status==="finished"||status==="error")&&(<button onClick={deleteHandler} className="bg-white border border-neutral-300">🗑️</button>)}
+        {
+          (status==="none" && creatable === false)
+          ?(<button className={`bg-gray-200 border-neutral-300 text-gray-800 w-[6rem] h-[5rem]`} onClick={onClick}>
+              <div>🚧</div>
+              <div className="text-xs">{"이전 단계 필요"}</div>
+            </button>)
+          :(<button className={`bg-white border-neutral-300 text-gray-800 w-[6rem] h-[5rem]`} onClick={onClick}>
+              <div>{document_status_emoji[status].emoji}</div>
+              <div className="text-sm">{document_status_emoji[status].text}</div>
+            </button>)
+        }
+        
+        <div className="px-2 w-[2rem] h-[5rem] flex justify-center items-center">
+          {(status==="finished"||status==="error")&&(<button onClick={deleteHandler} className="bg-white border border-neutral-300 h-full">🗑️</button>)}
+          {status==="progress"&&(<div className="animate-spin rounded-full h-7 w-7 border-b-2 border-green-500"></div>)}
         </div>
       </div>
 

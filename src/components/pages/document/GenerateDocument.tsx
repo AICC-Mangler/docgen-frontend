@@ -51,7 +51,7 @@ const GenerateDocument = () => {
   return (
     <div className="m-auto w-[50rem] p-8 overflow-y-auto bg-white rounded-2xl shadow-sm border border-green-200/50">
       <div>
-        <div>{currentProject?.title}</div>
+        <div className='text-gray-800'>{currentProject?.title}</div>
         <h1 className="text-3xl font-bold text-gray-800 mb-2">요구사항 정의서 생성</h1>
       </div>
       {isGen == false && (

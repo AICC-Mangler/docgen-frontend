@@ -151,6 +151,12 @@ const DocumentList = ({project_id}:{project_id:string|undefined}) => {
     },
   };
 
+  const DOCUMENT_CREATABLE : {[key:string]:boolean}= {
+    requirement_document: true,
+    functional_document: !((documents===undefined||documents["requirement_document"] === undefined)||documents["requirement_document"].status != "finished"),
+    policy_document:!((documents===undefined||documents["functional_document"] === undefined)||(documents["functional_document"].status != "finished"))
+  };
+
   const get_Click_Handler = (status: string, doc_type: string, id: string) => {
     if (status === 'error' || status === 'none')
       return () => DOCUMENT_GEN_FUNC[doc_type](project_id || '');
@@ -166,6 +172,8 @@ const DocumentList = ({project_id}:{project_id:string|undefined}) => {
     {documents
       ? DOCUMENT_TYPES.map((doc, idx) => {
           const docs = documents[doc.name];
+          const creatable = DOCUMENT_CREATABLE[doc.name]
+
           if (docs === undefined)
             return (
               <DocumentListItem
@@ -173,6 +181,7 @@ const DocumentList = ({project_id}:{project_id:string|undefined}) => {
                 display={doc.display}
                 create_date={'생성되지 않음'}
                 status={'none'}
+                creatable={creatable}
                 onClick={get_Click_Handler('none', doc.name, 'no_id')}
                 onDelete={()=>{}}
               />
@@ -181,8 +190,9 @@ const DocumentList = ({project_id}:{project_id:string|undefined}) => {
             <DocumentListItem
               key={idx}
               display={doc.display}
-              create_date={docs.create_date.substring(0, 10)}
+              create_date={docs.status==="progress"?"AI가 문서를 작성하고 있습니다.":docs.create_date.substring(0, 10)}
               status={docs.status}
+              creatable={creatable}
               onClick={get_Click_Handler(
                 docs.status,
                 doc.name,
