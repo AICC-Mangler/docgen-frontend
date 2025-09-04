@@ -159,39 +159,41 @@ const DocumentList = ({project_id}:{project_id:string|undefined}) => {
     return () => {};
   };
 
+
+  
   return (
     <div className="m-auto p-2 flex flex-col gap-2 w-full">
-            {documents
-              ? DOCUMENT_TYPES.map((doc, idx) => {
-                  const docs = documents[doc.name];
-                  if (docs === undefined)
-                    return (
-                      <DocumentListItem
-                        key={idx}
-                        display={doc.display}
-                        create_date={'생성되지 않음'}
-                        status={'none'}
-                        onClick={get_Click_Handler('none', doc.name, 'no_id')}
-                        onDelete={()=>{}}
-                      />
-                    );
-                  return (
-                    <DocumentListItem
-                      key={idx}
-                      display={doc.display}
-                      create_date={docs.create_date.substring(0, 10)}
-                      status={docs.status}
-                      onClick={get_Click_Handler(
-                        docs.status,
-                        doc.name,
-                        docs.id,
-                      )}
-                      onDelete={(()=>DOCUMENT_DELETE[doc.name](docs.id))}
-                    />
-                  );
-                })
-              : ''}
-          </div>
+    {documents
+      ? DOCUMENT_TYPES.map((doc, idx) => {
+          const docs = documents[doc.name];
+          if (docs === undefined)
+            return (
+              <DocumentListItem
+                key={idx}
+                display={doc.display}
+                create_date={'생성되지 않음'}
+                status={'none'}
+                onClick={get_Click_Handler('none', doc.name, 'no_id')}
+                onDelete={()=>{}}
+              />
+            );
+          return (
+            <DocumentListItem
+              key={idx}
+              display={doc.display}
+              create_date={docs.create_date.substring(0, 10)}
+              status={docs.status}
+              onClick={get_Click_Handler(
+                docs.status,
+                doc.name,
+                docs.id,
+              )}
+              onDelete={(()=>DOCUMENT_DELETE[doc.name](docs.id))}
+            />
+          );
+        })
+      : ''}
+  </div>
   );
 };
 
