@@ -4,6 +4,8 @@ import Modal from '../../common/Modal';
 import ProjectCreateModal from './ProjectCreateModal';
 import '../../../styles/main.css';
 import { useProjectStore } from '../../../stores/useProjectStore';
+import { useTimelineStore } from '../../../stores/useTimelineStore';
+import DocumentList from '../document/component/DocumentList';
 
 const ProjectDetail: React.FC = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -21,12 +23,20 @@ const ProjectDetail: React.FC = () => {
     clearError,
   } = useProjectStore();
 
+  const {
+    timelines,
+    isLoading: timelineLoading,
+    fetchTimelinesByProjectId,
+  } = useTimelineStore();
+
   useEffect(() => {
     const loadProject = async () => {
       if (!id) return;
 
       try {
         await fetchProjectById(parseInt(id, 10));
+        // 프로젝트 로드 후 타임라인도 로드
+        await fetchTimelinesByProjectId(parseInt(id, 10));
       } catch (error) {
         console.error('프로젝트 로딩 실패:', error);
       }
@@ -38,7 +48,7 @@ const ProjectDetail: React.FC = () => {
     return () => {
       clearError();
     };
-  }, [fetchProjectById, clearError, id]);
+  }, [fetchProjectById, fetchTimelinesByProjectId, clearError, id]);
 
   if (isLoading) {
     return (
@@ -224,15 +234,59 @@ const ProjectDetail: React.FC = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
+        <div className="space-y-6">
+          <div className="bg-white rounded-2xl shadow-sm border border-green-200/50 p-6">
+            <h3 className="text-xl font-semibold text-gray-800 mb-4">문서</h3>
+            <DocumentList project_id={id}></DocumentList>
+          </div>
+        </div>
+
         <div className="space-y-6">
           <div className="bg-white rounded-2xl shadow-sm border border-green-200/50 p-6">
             <h3 className="text-xl font-semibold text-gray-800 mb-4">
-              프로젝트 설명
+              타임라인
             </h3>
-            <p className="text-gray-600 leading-relaxed">
-              {currentProject.introduction}
-            </p>
+
+            {/* 타임라인 목록 */}
+            <div className="space-y-4">
+              {timelineLoading ? (
+                <div className="flex justify-center items-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500"></div>
+                  <span className="ml-3 text-gray-600">
+                    타임라인 로딩 중...
+                  </span>
+                </div>
+              ) : timelines.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  등록된 타임라인이 없습니다.
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {timelines.map((timeline: any) => (
+                    <div
+                      key={timeline.id}
+                      className="flex items-start p-4 bg-gray-50 rounded-lg border border-gray-200"
+                    >
+                      {/* 날짜 */}
+                      <div className="flex-shrink-0 w-20 text-sm font-medium text-gray-600 mr-4">
+                        {timeline.event_date}
+                      </div>
+
+                      {/* 콘텐츠 */}
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-gray-800 mb-1">
+                          {timeline.title}
+                        </h4>
+                        <p className="text-sm text-gray-600">
+                          {timeline.description}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -241,15 +295,18 @@ const ProjectDetail: React.FC = () => {
             <h3 className="text-xl font-semibold text-gray-800 mb-4">
               프로젝트 관리
             </h3>
-            <div className="space-y-3">
-              <Link
-                to={`/timelines/projects/${currentProject.id}`}
-                className="w-full px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200 text-center block"
-              >
-                타임라인 보기
-              </Link>
+            <div className="grid grid-cols-3 gap-60">
               <button
-                className="w-full px-4 py-3 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors duration-200"
+                className="w-50 px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md"
+                onClick={() =>
+                  navigate(`/timelines/projects/${currentProject.id}`)
+                }
+                title="타임라인 관리"
+              >
+                타임라인 관리
+              </button>
+              <button
+                className="w-50 px-4 py-3 bg-slate-500 hover:bg-slate-600 text-white font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md"
                 onClick={() => openEditModal(currentProject)}
                 title="수정"
               >
@@ -257,7 +314,7 @@ const ProjectDetail: React.FC = () => {
               </button>
 
               <button
-                className="w-full px-4 py-3 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors duration-200"
+                className="w-50 px-4 py-3 bg-rose-500 hover:bg-rose-600 text-white font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md"
                 onClick={() => openDeleteModal(currentProject)}
                 title="삭제"
               >

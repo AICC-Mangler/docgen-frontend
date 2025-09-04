@@ -33,17 +33,17 @@ const DocumentQuestion: React.FC<Document_question_type> = ({
   };
 
   return (
-    <div className="w-full p-1">
-      <div className="p-2">
+    <div className="w-full flex flex-col gap-4 justify-between">
+      <div className="p-2 overflow-y-auto flex flex-col gap-4">
         {questions?.map((question, idx) => (
           <div key={question + idx} className="w-full flex flex-col gap-3">
-            <div className="w-full px-3">{question}</div>
+            <div className="w-full px-3 text-black">{question}</div>
             <textarea
               className="w-full p-3 resize-none"
               rows={4}
               name=""
               id=""
-              placeholder="test"
+              placeholder={question}
               onChange={changeAnswer(idx)}
             ></textarea>
           </div>
