@@ -16,6 +16,7 @@
     "axios": "^1.11.0",
     "exceljs": "^4.4.0",
     "handsontable": "^16.0.1",
+    "postcss-nesting": "^13.0.2",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-redux": "9.2.0",
@@ -25,6 +26,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.33.0",
+    "@tailwindcss/nesting": "^0.0.0-insiders.565cd3e",
     "@types/react": "^19.1.10",
     "@types/react-dom": "^19.1.7",
     "@vitejs/plugin-react": "^5.0.0",
