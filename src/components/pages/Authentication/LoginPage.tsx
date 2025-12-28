@@ -105,7 +105,7 @@ const LoginPage: React.FC = () => {
             <div>
               <input
                 type="email"
-                placeholder="이메일을 입력해 주세요."
+                placeholder="테스트 이메일: aaa@aaa.aaa"
                 value={formData.email}
                 onChange={handleInputChange('email')}
                 className="w-full px-4 py-3 text-sm bg-white border border-black rounded-lg focus:border-green-500 text-gray-800 placeholder-gray-500"
@@ -120,7 +120,7 @@ const LoginPage: React.FC = () => {
               <div className="relative">
                 <input
                   type={showPassword ? 'text' : 'password'}
-                  placeholder="비밀번호를 입력해 주세요."
+                  placeholder="테스트 비밀번호: aaa111!!!"
                   value={formData.password}
                   onChange={handleInputChange('password')}
                   onKeyDown={handleKeyDown}
